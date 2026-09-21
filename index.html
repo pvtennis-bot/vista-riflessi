@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="1.1">
+<meta name="app-version" content="1.2">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -176,6 +176,13 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 .sum hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 .sum .ex{font-size:13px;color:var(--tx2);padding:2px 0}
 .wa{background:#25D366;color:#04140b}
+#warn{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:120;padding:16px}
+#warn .wbox{background:var(--card);border:1px solid #6b5a1c;border-radius:18px;padding:20px 18px 16px;width:min(100%,440px);max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#warn h3{margin:0 0 10px;font-size:19px;color:#f5c542}
+#warn p{margin:0 0 10px;font-size:14px;line-height:1.5;color:var(--tx)}
+#warn p.s{color:var(--tx2)}
+#warn .fill{background:#f5c542;color:#1a1405;margin-top:6px}
+.wlink{display:block;margin:22px auto 0;background:none;border:0;color:#f5c542;font-size:14px;cursor:pointer;padding:6px 10px}
 .gc{background:#4285F4;color:#04101f}
 </style>
 </head>
@@ -256,7 +263,8 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   <div class="opt">Suono e vibrazione <div class="sw on" id="sw-snd" onclick="tog('snd')"><i></i></div></div>
   <div class="opt">Schermo sempre acceso <div class="sw on" id="sw-wake" onclick="tog('wake')"><i></i></div></div>
 
-  <p class="note" style="text-align:center;margin-top:18px">Vista &amp; Riflessi · v<span id="ver"></span> · Patrizio Virga</p>
+  <button class="wlink" onclick="showWarn()">⚠️ Avvertenze</button>
+  <p class="note" style="text-align:center;margin-top:6px">Vista &amp; Riflessi · v<span id="ver"></span> · Patrizio Virga</p>
 </div>
 
 <div id="progv" class="hidden">
@@ -299,6 +307,17 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   <div id="list"></div>
 </div>
 
+<div id="warn"><div class="wbox">
+  <h3>⚠️ Avvertenze</h3>
+  <p>Alcuni esercizi mostrano punti luminosi in movimento rapido e lampi di colore a schermo intero. Una piccola percentuale di persone può avere crisi epilettiche a causa di luci lampeggianti, anche senza averne mai avute prima. Se tu o un familiare avete avuto crisi epilettiche o perdite di coscienza, consulta un medico prima di usare questi esercizi.</p>
+  <p><b>Interrompi subito</b> se compaiono capogiri, vista alterata, contrazioni o movimenti involontari, confusione.</p>
+  <p>Fermati in caso di fastidio agli occhi, mal di testa o nausea.</p>
+  <p>Sotto i 18 anni: solo con la supervisione di un adulto.</p>
+  <p class="s">Allenamento sportivo, non terapia: non sostituisce una visita dall'oculista.</p>
+  <p class="s" id="warn-ok" style="font-size:12px"></p>
+  <button class="fill" id="warn-yes" onclick="warnYes()">Ho letto, continua</button>
+  <button class="ghost" id="warn-no" onclick="warnNo()">Annulla</button>
+</div></div>
 <div id="askp"><div class="abox" id="askp-box"></div></div>
 
 <div id="done" class="hidden">
@@ -381,7 +400,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='1.1',VER_DATE='21/09/2026';
+const VER='1.2',VER_DATE='21/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -452,7 +471,16 @@ function paintTime(){
  $('prog').style.strokeDashoffset=653.5*(1-left/s.d);
  $('b-play').textContent=s.fs?'▶  Avvia a schermo intero':(run?'❚❚  Pausa':(left===s.d?'▶  Inizia esercizio':'▶  Riprendi'));
 }
-function toggle(){const s=cur.steps[idx];if(s.fs&&!run){openFS(s);return;}run?pause():play();}
+function toggle(){const s=cur.steps[idx];if(s.fs&&!run){if(!P.warn){showWarn(()=>openFS(s));return;}openFS(s);return;}run?pause():play();}
+/* ===== avvertenze ===== */
+let warnNext=null;
+function showWarn(next){warnNext=next||null;const done=!!P.warn;
+ $('warn-yes').textContent=next||!done?'Ho letto, continua':'Chiudi';
+ $('warn-no').style.display=next||!done?'block':'none';$('warn-no').textContent='Annulla';
+ $('warn-ok').textContent=done?'Letto e confermato il '+itDate(new Date(P.warn))+'.':'';
+ $('warn').style.display='flex';$('warn').querySelector('.wbox').scrollTop=0;}
+function warnYes(){if(!P.warn){P.warn=Date.now();save();}$('warn').style.display='none';const n=warnNext;warnNext=null;if(n)n();}
+function warnNo(){$('warn').style.display='none';warnNext=null;}
 function play(){if(run)return;run=true;beepInit();reqWake();schedBeep();
  tick=setInterval(()=>{left--;if(left<=0){clearInterval(tick);run=false;clearTimeout(bpT);
    if(cur.steps[idx].bp&&att>0)askCatch();else done();}paintTime();},1000);paintTime();}
