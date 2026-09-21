@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d1412">
 <title>Vista &amp; Riflessi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Vista">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -651,6 +655,7 @@ function endFS(){if(F.tg){cancelAnimationFrame(F.raf);F.run=false;F.ans=0;$('dot
  closeFS();left=0;done();}
 function exitFS(e){e.stopPropagation();closeFS();left=cur.steps[idx].d;paintStep();}
 paintHome();
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
