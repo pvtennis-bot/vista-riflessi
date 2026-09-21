@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
+<meta name="app-version" content="1.1">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -101,6 +102,18 @@ h1 span{color:var(--teal)}
 .fill{width:100%;border:0;border-radius:14px;padding:16px;background:var(--acc);color:#06120e;font-size:16px;font-weight:600;cursor:pointer}
 .ghost{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;background:none;color:var(--tx2);font-size:15px;margin-top:8px;cursor:pointer}
 .hidden{display:none}
+.ring.flash .tt{color:var(--acc);transform:scale(1.1)}
+.ring .tt{transition:transform .12s,color .12s}
+#askp{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+#askp .abox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 20px;width:min(100%,380px);text-align:center}
+#askp h3{margin:0 0 4px;font-size:18px}#askp p{margin:0 0 10px;color:var(--tx2);font-size:14px}
+#askp .cnt{display:flex;align-items:center;justify-content:center;gap:22px;margin:10px 0 18px}
+#askp .cnt b{font-size:56px;font-weight:600;min-width:80px;font-variant-numeric:tabular-nums}
+#askp .cnt button{width:58px;height:58px;border-radius:50%;border:1px solid var(--line);background:var(--bg2);color:var(--tx);font-size:28px}
+.card.violet .tag{background:rgba(167,139,250,.15);color:#a78bfa}
+#cue{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;pointer-events:none}
+#cue b{font-size:min(22vw,160px);font-weight:800;letter-spacing:-2px;color:#06120e}
+#cue small{font-size:18px;color:#555;margin-top:8px}
 .card.amber .tag{background:rgba(245,197,66,.14);color:#f5c542}
 #fs{position:fixed;inset:0;background:#000;z-index:99;display:none;touch-action:none;overflow:hidden}
 #fs.on{display:block}
@@ -121,6 +134,11 @@ h1 span{color:var(--teal)}
 #fs .cnt button,#fs .okb{background:#161616;border:1px solid #333;color:#ddd;border-radius:999px;font-size:30px;width:64px;height:64px}
 #fs .okb{width:auto;height:auto;font-size:17px;padding:14px 34px;background:#e4ff5a;color:#111;border:0;font-weight:600}
 #fs .res{font-size:22px;color:#ddd}
+#fs .kp{display:grid;grid-template-columns:repeat(3,64px);gap:10px;margin:6px 0 18px}
+#fs .kp button{background:#161616;border:1px solid #333;color:#ddd;border-radius:16px;font-size:26px;height:56px}
+#fs .sumv{font-size:72px;font-weight:300;color:#e4ff5a;min-height:84px;line-height:84px;font-variant-numeric:tabular-nums}
+#fs .hintv{font-size:17px;color:#ff8a5c;min-height:22px;margin-bottom:4px}
+#fs .mp{color:#e4ff5a;font-weight:700;letter-spacing:1px}
 .seg{background:var(--bg2);border:1px solid var(--line);color:var(--tx);border-radius:999px;padding:6px 14px;font-size:13px}
 #fs .cd small{display:block;font-size:15px;max-width:340px;margin-top:14px;color:#777}
 .inp{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--tx);border-radius:12px;
@@ -187,6 +205,14 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     <span class="go">›</span>
   </button>
 
+  <button class="card violet" id="c-presa" onclick="start('presa')">
+    <span class="tag">OGNI GIORNO · CON PALLINE</span>
+    <h2>Riflessi &amp; presa <span id="d-presa" class="done-dot"></span></h2>
+    <p>Prese al volo, reazione al segnale, mani indipendenti</p>
+    <div class="meta"><span>5 esercizi</span><span>~4,5 min</span><span>📱 1 a schermo</span></div>
+    <span class="go">›</span>
+  </button>
+
   <button class="card amber" id="c-schermo" onclick="start('schermo')">
     <span class="tag">OGNI GIORNO · IPAD</span>
     <h2>Allenatore visivo <span id="d-schermo" class="done-dot"></span></h2>
@@ -224,9 +250,13 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 
   <div class="sec">Impostazioni</div>
   <div class="opt">Avanzamento automatico <div class="sw" id="sw-auto" onclick="tog('auto')"><i></i></div></div>
+  <div class="opt">Ritmo beep (prese) <button class="seg" id="pace-btn" onclick="cycPace()">Lento</button></div>
   <div class="opt">Bersaglio interno (attenzione) <button class="seg" id="tg-btn" onclick="cycTg()">Colori</button></div>
+  <div class="opt">Match point (solo Somma) <div class="sw" id="sw-mp" onclick="tog('mp')"><i></i></div></div>
   <div class="opt">Suono e vibrazione <div class="sw on" id="sw-snd" onclick="tog('snd')"><i></i></div></div>
   <div class="opt">Schermo sempre acceso <div class="sw on" id="sw-wake" onclick="tog('wake')"><i></i></div></div>
+
+  <p class="note" style="text-align:center;margin-top:18px">Vista &amp; Riflessi · v<span id="ver"></span> · Patrizio Virga</p>
 </div>
 
 <div id="progv" class="hidden">
@@ -235,7 +265,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     <button data-v="28" onclick="setPer(28)">4 sett.</button><button data-v="56" onclick="setPer(56)">8 sett.</button><button data-v="0" onclick="setPer(0)">Tutto</button>
   </div>
   <div class="segs" id="seg-mod">
-    <button data-v="all" onclick="setMod('all')">Tutti</button><button data-v="col" onclick="setMod('col')">Colori</button><button data-v="num" onclick="setMod('num')">Numeri</button>
+    <button data-v="all" onclick="setMod('all')">Tutti</button><button data-v="col" onclick="setMod('col')">Colori</button><button data-v="num" onclick="setMod('num')">Numeri</button><button data-v="sum" onclick="setMod('sum')">Somma</button>
   </div>
   <div id="prog-body"></div>
 </div>
@@ -269,6 +299,8 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   <div id="list"></div>
 </div>
 
+<div id="askp"><div class="abox" id="askp-box"></div></div>
+
 <div id="done" class="hidden">
   <div class="big">
     <div class="em">✅</div>
@@ -292,6 +324,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 <div id="fs">
   <div class="hud"><span id="fs-lab"></span><span id="fs-t"></span><button class="x" onclick="exitFS(event)">✕ Esci</button></div>
   <div id="dot"><span id="in"></span></div>
+  <div id="cue"></div>
   <div class="cd" id="fs-cd"></div>
 </div>
 <script>
@@ -306,6 +339,10 @@ const ICONS={
  diag:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="12" r="5" fill="currentColor"/><circle cx="96" cy="52" r="5" fill="currentColor"/><circle cx="96" cy="12" r="5"/><circle cx="24" cy="52" r="5"/><path d="M32 17l56 30M88 17L32 47" stroke-dasharray="4 4"/></g></svg>',
  rand:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="currentColor" stroke="none"><circle cx="20" cy="12" r="4" opacity=".35"/><circle cx="60" cy="12" r="4" opacity=".35"/><circle cx="100" cy="12" r="4" opacity=".35"/><circle cx="20" cy="32" r="4" opacity=".35"/><circle cx="60" cy="32" r="4" opacity=".35"/><circle cx="100" cy="32" r="7"/><circle cx="20" cy="52" r="4" opacity=".35"/><circle cx="60" cy="52" r="4" opacity=".35"/><circle cx="100" cy="52" r="4" opacity=".35"/></g></svg>',
  purs:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M60 32C44 10 18 10 18 32s26 22 42 0 42-22 42 0-26 22-42 0" stroke-dasharray="4 4"/><circle cx="102" cy="32" r="6" fill="currentColor"/></g></svg>',
+ spalla:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="40" cy="12" r="7"/><path d="M40 19v26M40 45l-10 20M40 45l10 20M24 26h32"/><path d="M56 26c10-8 20-8 28 4" stroke-dasharray="4 4"/><circle cx="96" cy="18" r="6"/><path d="M96 26v30" stroke-dasharray="3 4"/><path d="M92 52l4 5 4-5"/></g></svg>',
+ incro:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="40" cy="14" r="6"/><circle cx="100" cy="14" r="6"/><path d="M40 22C52 44 88 44 100 60M100 22C88 44 52 44 40 60"/><path d="M36 56l4 5 5-4M104 56l-4 5-5-4"/></g></svg>',
+ segnale:'<svg width="140" height="70" viewBox="0 0 140 70"><g stroke="none"><rect x="14" y="14" width="34" height="42" rx="6" fill="#2fd49f"/><rect x="53" y="14" width="34" height="42" rx="6" fill="#4f8df5"/><rect x="92" y="14" width="34" height="42" rx="6" fill="#e5243b"/></g><g fill="#06120e" font-size="11" font-weight="700" text-anchor="middle"><text x="31" y="39">DX</text><text x="70" y="39">SX</text><text x="109" y="39">STOP</text></g></svg>',
+ compagno:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="30" cy="12" r="6"/><path d="M30 18v24M30 42l-8 22M30 42l8 22M30 26h22"/><circle cx="58" cy="30" r="5"/><path d="M58 38v16" stroke-dasharray="3 4"/><circle cx="108" cy="12" r="6"/><path d="M108 18v24M108 42l-8 22M108 42l8 22M108 28H80"/><path d="M60 58h14"/></g></svg>',
  scritte:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="52" cy="35" r="24"/><path d="M28 35h48"/><text x="52" y="30" font-size="16" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">A7</text><path stroke-dasharray="4 4" d="M84 22h18M84 35h22M84 48h18"/></g></svg>'
 };
 const FSX='iPad a <b>40–50 cm</b>, luce ambiente normale. <b>Testa ferma</b>: segui il punto solo con gli occhi. Tocca lo schermo per mettere in pausa.';
@@ -316,16 +353,18 @@ const FS={
    {k:'jump',l:'↖ ↘',pts:[[-1,-1],[1,1]],from:950,to:600,d:15},
    {k:'jump',l:'↗ ↙',pts:[[1,-1],[-1,1]],from:950,to:600,d:15}]},
  X:{t:'Saccadi a sorpresa',s:'schermo · 30 sec',d:30,i:'rand',fs:[{k:'rand',l:'reattività',from:900,to:480,d:30}]},
+ G:{t:'Presa al segnale',s:'schermo · 60 sec',d:60,i:'segnale',nt:1,fs:[{k:'cue',l:'aspetta il colore',min:1600,max:4200,d:60}],
+   x:'Pallina in ogni mano, braccia tese davanti a te all\'altezza delle spalle, iPad appoggiato davanti. <b>VERDE</b>: lascia la destra e riprendila prima che tocchi terra. <b>BLU</b>: la sinistra. <b>ROSSO</b>: non muoverti. Il segnale arriva quando non te lo aspetti.'},
  S:{t:'Inseguimento lento',s:'schermo · 30 sec',d:30,i:'purs',fs:[
    {k:'h',l:'orizzontale',per:4000,d:10},{k:'v',l:'verticale',per:4000,d:10},{k:'8',l:'otto',per:6000,d:10}]}
 };
-for(const k in FS){FS[k].x=FSX;FS[k].id=k;}
+for(const k in FS){if(!FS[k].x)FS[k].x=FSX;FS[k].id=k;}
 const R={
  casa:{k:'casa',name:'A casa',acc:'teal',days:[1,3,5],steps:[
   FS.H,FS.V,FS.D,FS.S,
   {t:'Fuoco vicino / lontano',s:'60 sec',d:60,i:'fuoco',x:'Fissa il dito vicino al naso per <b>2 secondi</b>, poi un punto lontano per <b>2 secondi</b>. Alterna senza pause.'},
-  {t:'Tracciamento al muro',s:'mano destra · 60 sec',d:60,i:'muro',x:'Lancia la pallina al muro, un rimbalzo, presa con la <b>destra</b>. Occhi incollati sul palmo fino alla presa.'},
-  {t:'Tracciamento al muro',s:'mano sinistra · 60 sec',d:60,i:'muro',x:'Stessa cosa con la <b>sinistra</b>. Se ti scappa, rallenta il lancio: conta la presa pulita, non la velocità.'},
+  {t:'Tracciamento al muro · DX',s:'mano destra · 60 sec',d:60,i:'muro',x:'Lancia la pallina al muro, un rimbalzo, presa con la <b>destra</b>. Occhi incollati sul palmo fino alla presa.'},
+  {t:'Tracciamento al muro · SX',s:'mano sinistra · 60 sec',d:60,i:'muro',x:'Stessa cosa con la <b>sinistra</b>. Se ti scappa, rallenta il lancio: conta la presa pulita, non la velocità.'},
   {t:'Visione periferica',s:'90 sec',d:90,i:'peri',x:'Fissa un punto dritto sul muro. Lancia e afferra la pallina <b>di lato</b>, usando solo la coda dell\'occhio. Non spostare lo sguardo.'}
  ]},
  campo:{k:'campo',name:'Prima del match',acc:'coral',days:[2,4],steps:[
@@ -333,14 +372,22 @@ const R={
   {t:'Tracciamento rapido',s:'90 sec',d:90,i:'rapid',x:'Lanci veloci contro il muro, presa a una mano. Serve a <b>calibrare l\'occhio</b>, non a stancarti.'},
   {t:'Trucco delle scritte',s:'durante il palleggio · 120 sec',d:120,i:'scritte',x:'Sforzati di <b>leggere le lettere o i numeri</b> scritti a pennarello sulle palline mentre il compagno te le lancia.'}
  ]},
+ presa:{k:'presa',name:'Riflessi & presa',acc:'violet',days:[],steps:[
+  {t:'Tocco spalla e presa · DX',s:'mano destra · 45 sec · al beep',d:45,i:'spalla',id:'P1',bp:[2600,4200],x:'Pallina in mano destra, braccio teso all\'altezza della spalla. Al <b>beep</b>: lascia, tocca la spalla sinistra con la stessa mano e <b>riprendila al volo</b>. Poi torna in posizione di attesa e aspetta il beep successivo. Se ti cade, raccoglila con calma: se non sei pronto, lascia passare quel beep. Alla fine inserisci quante prese pulite.'},
+  {t:'Tocco spalla e presa · SX',s:'mano sinistra · 45 sec · al beep',d:45,i:'spalla',id:'P2',bp:[2600,4200],x:'Stessa cosa con la <b>sinistra</b>, sempre al beep. Quando riesci quasi sempre: tocca entrambe le spalle, oppure batti le mani prima della presa.'},
+  {t:'Doppio rilascio incrociato',s:'60 sec · al beep',d:60,i:'incro',id:'P3',bp:[3200,5000],x:'Una pallina per mano, braccia tese. Al <b>beep</b> lasciale insieme e riprendile <b>incrociando</b> le mani. Conta come presa pulita solo se le prendi <b>entrambe</b>. Se è troppo difficile, prima senza incrociare.'},
+  FS.G,
+  {t:'Presa a sorpresa col compagno',s:'se hai un compagno · 60 sec',d:60,i:'compagno',x:'Il compagno tiene la pallina all\'altezza della tua spalla, a 1 m. La <b>lascia senza avvisare</b>: la prendi al volo. Poi a due mani con due palline: lui ne lascia una sola, tu scegli quale mano. Se sei solo, salta con ›.'}
+ ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
+const VER='1.1',VER_DATE='21/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
 const SS=JSON.parse(localStorage.getItem('vr-sess')||'[]');
 const DAYS=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-let res=[];let cur=null,idx=0,left=0,run=false,tick=null,dn=[],wl=null,ac=null,t0=null,lastSess=null;
+let res=[],rp=[],att=0,bpT=null;let cur=null,idx=0,left=0,run=false,tick=null,dn=[],wl=null,ac=null,t0=null,lastSess=null;
 
 function save(){localStorage.setItem('vr-pref',JSON.stringify(P));localStorage.setItem('vr-log',JSON.stringify(L));
  localStorage.setItem('vr-sess',JSON.stringify(SS.slice(-300)));}
@@ -349,8 +396,9 @@ function hm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinut
 function itDate(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
 function key(d){return d.toISOString().slice(0,10);}
 function tog(k){P[k]=P[k]?0:1;save();paintSw();if(k==='wake'&&!P.wake)relWake();}
-function cycTg(){P.target={off:'col',col:'num',num:'off'}[P.target||'col'];save();paintSw();}
-function paintSw(){$('tg-btn').textContent={off:'Spento',col:'Colori',num:'Numeri'}[P.target||'col'];$('sw-auto').className='sw'+(P.auto?' on':'');$('sw-snd').className='sw'+(P.snd?' on':'');$('sw-wake').className='sw'+(P.wake?' on':'');}
+function cycTg(){P.target={off:'col',col:'num',num:'sum',sum:'off'}[P.target||'col'];save();paintSw();}
+function cycPace(){P.pace={lento:'medio',medio:'veloce',veloce:'lento'}[P.pace||'lento'];save();paintSw();}
+function paintSw(){$('pace-btn').textContent={lento:'Lento 5–8 s',medio:'Medio 4–6 s',veloce:'Veloce 2,5–4 s'}[P.pace||'lento'];$('tg-btn').textContent={off:'Spento',col:'Colori',num:'Numeri',sum:'Somma'}[P.target||'col'];$('sw-mp').className='sw'+(P.mp?' on':'');$('sw-auto').className='sw'+(P.auto?' on':'');$('sw-snd').className='sw'+(P.snd?' on':'');$('sw-wake').className='sw'+(P.wake?' on':'');}
 
 function streak(){let n=0,d=new Date();if(!(L[key(d)]||[]).length)d.setDate(d.getDate()-1);
  while((L[key(d)]||[]).length){n++;d.setDate(d.getDate()-1);}return n;}
@@ -361,6 +409,7 @@ function paintHome(){
  $('d-casa').textContent=today.includes('casa')?' ✓':'';
  $('d-campo').textContent=today.includes('campo')?' ✓':'';
  $('d-schermo').textContent=today.includes('schermo')?' ✓':'';
+ $('d-presa').textContent=today.includes('presa')?' ✓':'';
  $('c-casa').classList.toggle('today',R.casa.days.includes(wd));
  $('c-campo').classList.toggle('today',R.campo.days.includes(wd));
  $('uname').value=P.name||'';
@@ -373,13 +422,13 @@ function paintHome(){
  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const v=L[key(d)]||[];
   const e=document.createElement('div');e.className='day'+(v.includes('casa')?' h':'')+(v.includes('campo')?' c':'');
   e.innerHTML=lab[i]+'<b>'+(v.length?'●':'○')+'</b>';w.appendChild(e);}
- paintSw();paintBk();
+ paintSw();paintBk();$('ver').textContent=VER+' ('+VER_DATE+')';
  const lm=[];for(let i=SS.length-1;i>=0&&lm.length<1;i--)if(SS[i].att)lm.push(SS[i].att);
- $('nav-sub').textContent=lm.length?'Ultima sessione: conteggi esatti '+lm[0]:'Precisione e attenzione nel tempo';
+ $('nav-sub').textContent=lm.length?'Ultima sessione: risposte esatte '+lm[0]:'Precisione e attenzione nel tempo';
 }
 
-function start(k){cur=R[k];idx=0;dn=[];res=[];left=cur.steps[0].d;run=false;t0=new Date();
- const AC={teal:['#2fd49f','#0f6e56'],coral:['#ff8a5c','#993c1d'],amber:['#f5c542','#7a5a0c']}[cur.acc];
+function start(k){cur=R[k];idx=0;dn=[];res=[];rp=[];att=0;left=cur.steps[0].d;run=false;t0=new Date();
+ const AC={teal:['#2fd49f','#0f6e56'],coral:['#ff8a5c','#993c1d'],amber:['#f5c542','#7a5a0c'],violet:['#a78bfa','#5b3fa8']}[cur.acc];
  document.documentElement.style.setProperty('--acc',AC[0]);document.documentElement.style.setProperty('--acc-d',AC[1]);
  $('home').classList.add('hidden');$('done').classList.add('hidden');$('player').classList.remove('hidden');
  $('rname').textContent=cur.name;paintStep();window.scrollTo(0,0);}
@@ -399,30 +448,45 @@ function paintStep(){
 function fmt(n){return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
 function paintTime(){
  const s=cur.steps[idx];$('p-time').textContent=fmt(Math.max(0,left));
- $('p-state').textContent=run?'in corso':(left===s.d?'pronto':'in pausa');
+ $('p-state').textContent=run?(s.bp?att+' segnali':'in corso'):(left===s.d?(s.bp?'parte al primo beep':'pronto'):'in pausa');
  $('prog').style.strokeDashoffset=653.5*(1-left/s.d);
  $('b-play').textContent=s.fs?'▶  Avvia a schermo intero':(run?'❚❚  Pausa':(left===s.d?'▶  Inizia esercizio':'▶  Riprendi'));
 }
 function toggle(){const s=cur.steps[idx];if(s.fs&&!run){openFS(s);return;}run?pause():play();}
-function play(){if(run)return;run=true;beepInit();reqWake();
- tick=setInterval(()=>{left--;if(left<=0){clearInterval(tick);run=false;done();}paintTime();},1000);paintTime();}
-function pause(){run=false;clearInterval(tick);relWake();paintTime();}
-function done(){dn[idx]=1;signal();
+function play(){if(run)return;run=true;beepInit();reqWake();schedBeep();
+ tick=setInterval(()=>{left--;if(left<=0){clearInterval(tick);run=false;clearTimeout(bpT);
+   if(cur.steps[idx].bp&&att>0)askCatch();else done();}paintTime();},1000);paintTime();}
+function schedBeep(){const s=cur.steps[idx];clearTimeout(bpT);if(!s.bp||!run)return;
+ bpT=setTimeout(()=>{if(!run)return;att++;beep(1040,.13,.3);if(navigator.vibrate)navigator.vibrate(60);
+  const r=document.querySelector('.ring');r.classList.add('flash');setTimeout(()=>r.classList.remove('flash'),220);paintTime();schedBeep();},
+  paceMs(s));}
+const PACE={lento:[5000,8000],medio:[3800,6000],veloce:[2600,4200]};
+function paceMs(s){const r=PACE[P.pace||'lento'],x=s.id==='P3'?900:0;return r[0]+x+Math.random()*(r[1]-r[0]);}
+function askCatch(){signal();const s=cur.steps[idx];let v=att;
+ const draw=()=>{$('askp-box').innerHTML='<h3>'+s.t+'</h3><p>Segnali: <b>'+att+'</b> · quante prese pulite?</p>'+
+  '<div class="cnt"><button onclick="acAdj(-1)">−</button><b id="acv">'+v+'</b><button onclick="acAdj(1)">+</button></div>'+
+  '<button class="fill" onclick="acOk()">Conferma</button>';};
+ window.acAdj=n=>{v=Math.max(0,Math.min(att,v+n));$('acv').textContent=v;};
+ window.acOk=()=>{rp[idx]={id:s.id,t:att,ok:v};$('askp').style.display='none';att=0;done();};
+ draw();$('askp').style.display='flex';}
+function pause(){run=false;clearInterval(tick);clearTimeout(bpT);relWake();paintTime();}
+function done(){dn[idx]=1;signal();att=0;
  if(idx<cur.steps.length-1){idx++;left=cur.steps[idx].d;paintStep();if(P.auto)setTimeout(play,900);}
  else{finish();}}
-function go(n){pause();const i=idx+n;if(i<0)return;if(i>=cur.steps.length){finish();return;}
+function go(n){pause();att=0;const i=idx+n;if(i<0)return;if(i>=cur.steps.length){finish();return;}
  if(n>0)dn[idx]=1;idx=i;left=cur.steps[idx].d;paintStep();}
-function jump(i){pause();idx=i;left=cur.steps[i].d;paintStep();}
+function jump(i){pause();att=0;idx=i;left=cur.steps[i].d;paintStep();}
 function finish(){pause();
  const end=new Date(),st=t0||end,k=key(end);
  L[k]=L[k]||[];if(!L[k].includes(keyOf(cur)))L[k].push(keyOf(cur));
  const ndone=dn.filter(Boolean).length;
  lastSess={r:cur.name,rk:keyOf(cur),name:P.name||'',day:DAYS[end.getDay()],date:itDate(end),
    iso:k,start:hm(st),end:hm(end),min:Math.max(1,Math.round((end-st)/60000)),
-   n:ndone,tot:cur.steps.length,ex:cur.steps.map((e,i)=>(dn[i]?'✓ ':'· ')+e.t+' ('+e.s+')'+(res[i]?' · conteggio '+res[i].ans+'/'+res[i].real+(res[i].ans===res[i].real?' ✔':''):'')),
+   n:ndone,tot:cur.steps.length,ex:cur.steps.map((e,i)=>(dn[i]?'✓ ':'· ')+e.t+' ('+e.s+')'+(rp[i]?' · prese '+rp[i].ok+'/'+rp[i].t:'')+(res[i]?' · '+(res[i].m==='sum'?'somma':'conteggio')+' '+res[i].ans+'/'+res[i].real+(res[i].ans===res[i].real?' ✔':'')+(res[i].mp?' · MP':''):'')),
    att:res.filter(Boolean).length?res.filter(r=>r&&r.ans===r.real).length+'/'+res.filter(Boolean).length:'',
    ms:st.getTime(),me:end.getTime()};
- lastSess.rs=res.filter(Boolean);SS.push(lastSess);save();
+ lastSess.rs=res.filter(Boolean);lastSess.rp=rp.filter(Boolean);
+ {const T=lastSess.rp.reduce((a,b)=>a+b.t,0),O=lastSess.rp.reduce((a,b)=>a+b.ok,0);lastSess.pr=T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';}SS.push(lastSess);save();
  $('player').classList.add('hidden');$('done').classList.remove('hidden');
  $('done-txt').textContent='Serie: '+streak()+' giorni consecutivi';
  $('sum').innerHTML=
@@ -432,14 +496,15 @@ function finish(){pause();
    '<div class="l"><span>Orario</span><b>'+lastSess.start+' – '+lastSess.end+'</b></div>'+
    '<div class="l"><span>Durata</span><b>'+lastSess.min+' min</b></div>'+
    '<div class="l"><span>Esercizi</span><b>'+lastSess.n+'/'+lastSess.tot+'</b></div>'+
-   (lastSess.att?'<div class="l"><span>Conteggi esatti</span><b>'+lastSess.att+'</b></div>':'')+'<hr>'+
+   (lastSess.att?'<div class="l"><span>Risposte esatte</span><b>'+lastSess.att+'</b></div>':'')+
+   (lastSess.pr?'<div class="l"><span>Prese pulite</span><b>'+lastSess.pr+'</b></div>':'')+'<hr>'+
    lastSess.ex.map(e=>'<div class="ex">'+esc(e)+'</div>').join('');
  window.scrollTo(0,0);}
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 
 function sessText(s){return '👁️ VISTA & RIFLESSI\n'+(s.name?'Atleta: '+s.name+'\n':'')+
  'Routine: '+s.r+'\n'+s.day.charAt(0).toUpperCase()+s.day.slice(1)+' '+s.date+' · '+s.start+'–'+s.end+' ('+s.min+' min)\n'+
- 'Esercizi: '+s.n+'/'+s.tot+(s.att?'\nConteggi esatti: '+s.att:'')+'\n\n'+s.ex.join('\n');}
+ 'Esercizi: '+s.n+'/'+s.tot+(s.att?'\nRisposte esatte: '+s.att:'')+(s.pr?'\nPrese pulite: '+s.pr:'')+'\n\n'+s.ex.join('\n');}
 function shareWA(){const t=sessText(lastSess);
  if(navigator.share){navigator.share({text:t}).catch(()=>waLink(t));}else waLink(t);}
 function waLink(t){window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}
@@ -463,10 +528,10 @@ function dl(txt,fn,mime){const b=new Blob([txt],{type:(mime||'text/plain')+';cha
  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
 function allText(){if(!SS.length)return'Nessuna sessione registrata.';
  return '👁️ VISTA & RIFLESSI · STORICO'+(P.name?'\nAtleta: '+P.name:'')+'\nSessioni: '+SS.length+'\n\n'+
-  SS.slice().reverse().slice(0,40).map(s=>s.date+' ('+s.day+') '+s.start+' · '+s.r+' · '+s.n+'/'+s.tot+' es'+(s.att?' · conteggi '+s.att:'')).join('\n')+
+  SS.slice().reverse().slice(0,40).map(s=>s.date+' ('+s.day+') '+s.start+' · '+s.r+' · '+s.n+'/'+s.tot+' es'+(s.att?' · esatte '+s.att:'')+(s.pr?' · prese '+s.pr:'')).join('\n')+
   (SS.length>40?'\n… ('+(SS.length-40)+' sessioni precedenti nel codice)':'');}
 /* backup compatto */
-function packAll(){return{v:1,name:P.name||'',ss:SS.map(s=>({k:s.rk,a:s.ms,b:s.me,n:s.n,t:s.tot,r:(s.rs||[]).map(x=>[x.id,x.m,x.real,x.ans])}))};}
+function packAll(){return{v:1,name:P.name||'',ss:SS.map(s=>({k:s.rk,a:s.ms,b:s.me,n:s.n,t:s.tot,r:(s.rs||[]).map(x=>[x.id,x.m,x.real,x.ans,x.mp?1:0]),p:(s.rp||[]).map(x=>[x.id,x.t,x.ok])}))};}
 function b64e(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
 function b64d(t){return JSON.parse(decodeURIComponent(escape(atob(t))));}
 function code(){return 'VR1:'+b64e(packAll());}
@@ -492,7 +557,8 @@ function restoreText(t){let o=null;t=String(t||'').trim();
  for(const c of o.ss){if(have.has(c.a))continue;const R0=R[c.k]||R.casa,st=new Date(c.a),en=new Date(c.b);
   SS.push({r:R0.name,rk:c.k,name:o.name||'',day:DAYS[en.getDay()],date:itDate(en),iso:key(en),start:hm(st),end:hm(en),
    min:Math.max(1,Math.round((c.b-c.a)/60000)),n:c.n,tot:c.t,ex:[],ms:c.a,me:c.b,
-   rs:(c.r||[]).map(x=>({id:x[0],m:x[1],real:x[2],ans:x[3]})),
+   rs:(c.r||[]).map(x=>({id:x[0],m:x[1],real:x[2],ans:x[3],mp:x[4]?1:0})),rp:(c.p||[]).map(x=>({id:x[0],t:x[1],ok:x[2]})),
+   pr:(c.p&&c.p.length)?(()=>{const T=c.p.reduce((a,b)=>a+b[1],0),O=c.p.reduce((a,b)=>a+b[2],0);return T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';})():'',
    att:(c.r&&c.r.length)?c.r.filter(x=>x[2]===x[3]).length+'/'+c.r.length:''});
   const k=key(en);L[k]=L[k]||[];if(!L[k].includes(c.k))L[k].push(c.k);add++;}
  SS.sort((a,b)=>a.ms-b.ms);if(!P.name&&o.name)P.name=o.name;save();
@@ -516,22 +582,30 @@ function paintProg(){segOn('seg-per',PER);segOn('seg-mod',MOD);
  const cur_=stats(trs(now-span*D,now+1)),prev=PER?stats(trs(now-2*span*D,now-span*D)):null;
  const nSess=SS.filter(s=>s.ms>=now-span*D).length;
  let h='';
+ const hasP=SS.some(s=>(s.rp||[]).length);
+ if(!SS.some(s=>(s.rs||[]).length)&&hasP){$('prog-body').innerHTML=presaChart(PER?PER/7:8)+heat();return;}
  if(!SS.some(s=>(s.rs||[]).length)){$('prog-body').innerHTML='<div class="empty">Ancora nessun dato di precisione.<br>Completa un esercizio a schermo con il bersaglio attivo e qui comparirà il tuo andamento.</div>'+heat();return;}
  h+='<div class="tiles">'+
-  '<div class="tile"><small>Conteggi esatti</small><b>'+(cur_?Math.round(cur_.ok)+'%':'—')+'</b>'+delta(cur_&&cur_.ok,prev&&prev.ok)+'</div>'+
+  '<div class="tile"><small>Risposte esatte</small><b>'+(cur_?Math.round(cur_.ok)+'%':'—')+'</b>'+delta(cur_&&cur_.ok,prev&&prev.ok)+'</div>'+
   '<div class="tile"><small>Errore medio</small><b>'+(cur_?Math.round(cur_.er)+'%':'—')+'</b>'+delta(cur_&&cur_.er,prev&&prev.er,true)+'</div>'+
   '<div class="tile"><small>Sessioni</small><b>'+nSess+'</b><i class="eq">'+(PER?'ultimi '+PER+' giorni':'totali')+'</i></div>'+
-  '<div class="tile"><small>Prove misurate</small><b>'+(cur_?cur_.n:0)+'</b><i class="eq">esercizi con conteggio</i></div></div>';
+  mpTile()+'<div class="tile"><small>Prove misurate</small><b>'+(cur_?cur_.n:0)+'</b><i class="eq">esercizi con bersaglio</i></div></div>';
  h+=advice();
  h+=weekChart(PER?PER/7:Math.min(12,Math.ceil(span/7)));
  h+=exChart(span);
+ if(hasP)h+=presaChart(PER?PER/7:Math.min(12,Math.ceil(span/7)));
  h+=heat();
  h+='<p class="note">Il miglioramento vero è la tendenza su 3–4 settimane. Confronta i periodi con lo stesso livello (Colori o Numeri).</p>';
  $('prog-body').innerHTML=h;}
+function mpTile(){if(MOD!=='all'&&MOD!=='sum')return'';const now=Date.now(),span=PER||36500;
+ const l=trs(now-span*864e5,now+1).filter(r=>r.mp);if(!l.length)return'';const w=l.filter(r=>r.ans===r.real).length;
+ return'<div class="tile" style="grid-column:1/-1"><small>Match point vinti (Somma, un solo tentativo)</small><b>'+w+'/'+l.length+'</b><i class="eq">'+Math.round(w/l.length*100)+'%</i></div>';}
 function advice(){const last=[];for(let i=SS.length-1;i>=0&&last.length<25;i--)for(const r of(SS[i].rs||[]))last.push(r);
  const lvl=P.target||'col',rec=last.filter(r=>r.m===lvl).slice(0,15),st=stats(rec);if(!st||st.n<10)return'';
  if(lvl==='col'&&st.ok>=85)return'<div class="advice">🎯 <b>Pronto per salire di livello.</b> '+Math.round(st.ok)+'% esatti nelle ultime prove a Colori: passa a <b>Numeri</b> in Impostazioni.</div>';
- if(st.ok<40)return'<div class="advice">🐢 Precisione bassa nelle ultime prove ('+Math.round(st.ok)+'%). Qualità prima della velocità'+(lvl==='num'?': torna a <b>Colori</b> per una settimana.':': fai solo la prima metà di ogni esercizio, poi riprendi.')+'</div>';
+ if(lvl==='num'&&st.ok>=85)return'<div class="advice">🎯 <b>Pronto per salire di livello.</b> '+Math.round(st.ok)+'% esatti nelle ultime prove a Numeri: passa a <b>Somma</b> in Impostazioni.</div>';
+ if(lvl==='sum'&&st.ok>=85&&!P.mp)return'<div class="advice">🏆 '+Math.round(st.ok)+'% esatti a Somma: prova il <b>Match point</b> in Impostazioni.</div>';
+ if(st.ok<40)return'<div class="advice">🐢 Precisione bassa nelle ultime prove ('+Math.round(st.ok)+'%). Qualità prima della velocità'+(lvl==='num'?': torna a <b>Colori</b> per una settimana.':lvl==='sum'?': torna a <b>Numeri</b> per una settimana.':': fai solo la prima metà di ogni esercizio, poi riprendi.')+'</div>';
  return'';}
 function weekChart(nw){nw=Math.max(4,Math.round(nw));const m0=monday(new Date()),W=340,H=178,x0=30,x1=330,y0=14,y1=136,pts=[];
  for(let i=nw-1;i>=0;i--){const a=new Date(m0);a.setDate(a.getDate()-7*i);const b=new Date(a);b.setDate(b.getDate()+7);
@@ -547,7 +621,7 @@ function weekChart(nw){nw=Math.max(4,Math.round(nw));const m0=monday(new Date())
   dots+='<circle cx="'+cx+'" cy="'+Y(p.st.ok)+'" r="3.6" fill="#2fd49f" stroke="#182521" stroke-width="1.5"/>';});
  return'<div class="chart"><h4>Andamento settimanale</h4><p>Più alta la linea, più bassa la barra: stai migliorando</p>'+
   '<svg viewBox="0 0 '+W+' '+H+'">'+g+bars+'<path d="'+line+'" fill="none" stroke="#2fd49f" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>'+dots+labs+'</svg>'+
-  '<div class="leg"><span style="--c:#2fd49f">% conteggi esatti</span><span style="--c:#ff8a5c">errore medio %</span></div></div>';}
+  '<div class="leg"><span style="--c:#2fd49f">% risposte esatte</span><span style="--c:#ff8a5c">errore medio %</span></div></div>';}
 function exChart(span){const now=Date.now(),D=864e5,ids=Object.keys(EXN),rowH=34,W=340,H=ids.length*rowH+6,x0=96,x1=300;
  let g='',any=false;
  ids.forEach((id,i)=>{const f=r=>r.id===id;const a=stats(trs(now-span*D,now+1).filter(f)),b=PER?stats(trs(now-2*span*D,now-span*D).filter(f)):null;
@@ -558,9 +632,20 @@ function exChart(span){const now=Date.now(),D=864e5,ids=Object.keys(EXN),rowH=34
    '<text x="'+(W-2)+'" y="'+(y+14)+'" font-size="12" fill="#eaf2ee" text-anchor="end" font-weight="600">'+Math.round(a.ok)+'%</text>';}
   else g+='<text x="'+(W-2)+'" y="'+(y+14)+'" font-size="12" fill="#5e6f69" text-anchor="end">—</text>';});
  if(!any)return'';
- return'<div class="chart"><h4>Per esercizio</h4><p>% conteggi esatti'+(PER?' · barra sottile = periodo precedente':'')+'</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg></div>';}
+ return'<div class="chart"><h4>Per esercizio</h4><p>% risposte esatte'+(PER?' · barra sottile = periodo precedente':'')+'</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg></div>';}
+function presaChart(nw){nw=Math.max(4,Math.round(nw));const m0=monday(new Date()),W=340,H=160,x0=30,x1=330,y0=12,y1=122,pts=[];
+ for(let i=nw-1;i>=0;i--){const a=new Date(m0);a.setDate(a.getDate()-7*i);const b=new Date(a);b.setDate(b.getDate()+7);let T=0,O=0;
+  for(const s of SS)if(s.ms>=a.getTime()&&s.ms<b.getTime())for(const r of(s.rp||[])){T+=r.t;O+=r.ok;}
+  pts.push({lab:a.getDate()+'/'+(a.getMonth()+1),v:T?O/T*100:null,T});}
+ const bw=(x1-x0)/nw,Y=v=>y1-(v/100)*(y1-y0);let g='';
+ for(const v of[0,50,100])g+='<line x1="'+x0+'" x2="'+x1+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#26332e"/><text x="'+(x0-6)+'" y="'+(Y(v)+4)+'" font-size="10" fill="#9db0a8" text-anchor="end">'+v+'</text>';
+ pts.forEach((p,i)=>{const cx=x0+bw*i+bw/2;
+  if(i%Math.ceil(nw/8)===0||i===nw-1)g+='<text x="'+cx+'" y="'+(y1+16)+'" font-size="10" fill="#9db0a8" text-anchor="middle">'+(i===nw-1?'ora':p.lab)+'</text>';
+  if(p.v==null)return;g+='<rect x="'+(cx-bw*.3)+'" y="'+Y(p.v)+'" width="'+(bw*.6)+'" height="'+(y1-Y(p.v))+'" rx="4" fill="#a78bfa"/>'+
+   '<text x="'+cx+'" y="'+(Y(p.v)-5)+'" font-size="10" fill="#eaf2ee" text-anchor="middle">'+Math.round(p.v)+'</text>';});
+ return'<div class="chart"><h4>Prese pulite al beep</h4><p>% prese riuscite per settimana (tocco spalla + doppio rilascio)</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg></div>';}
 function heat(){const m0=monday(new Date()),nw=8,cs=34,gap=5,W=340,x0=W-(7*cs+6*gap),H=nw*(22)+18;
- const col={casa:'#2fd49f',campo:'#ff8a5c',schermo:'#f5c542'};let g='';
+ const col={casa:'#2fd49f',campo:'#ff8a5c',schermo:'#f5c542',presa:'#a78bfa'};let g='';
  ['L','M','M','G','V','S','D'].forEach((l,j)=>g+='<text x="'+(x0+j*(cs+gap)+cs/2)+'" y="10" font-size="10" fill="#9db0a8" text-anchor="middle">'+l+'</text>');
  for(let w=0;w<nw;w++){const a=new Date(m0);a.setDate(a.getDate()-7*(nw-1-w));const y=16+w*22;
   g+='<text x="0" y="'+(y+12)+'" font-size="10" fill="#9db0a8">'+a.getDate()+'/'+(a.getMonth()+1)+'</text>';
@@ -568,7 +653,7 @@ function heat(){const m0=monday(new Date()),nw=8,cs=34,gap=5,W=340,x0=W-(7*cs+6*
    const c=v.length?col[v[v.length-1]]||'#2fd49f':'#26332e';
    g+='<rect x="'+(x0+j*(cs+gap))+'" y="'+y+'" width="'+cs+'" height="17" rx="5" fill="'+c+'" opacity="'+(fut?.25:v.length>1?1:v.length?.8:1)+'"'+(v.length>1?' stroke="#fff" stroke-width="1.2"':'')+'/>';}}
  return'<div class="chart"><h4>Costanza · ultime 8 settimane</h4><p>Bordo bianco = più routine nello stesso giorno</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg>'+
-  '<div class="leg"><span style="--c:#2fd49f">casa</span><span style="--c:#ff8a5c">pre-match</span><span style="--c:#f5c542">schermo</span></div></div>';}
+  '<div class="leg"><span style="--c:#2fd49f">casa</span><span style="--c:#ff8a5c">pre-match</span><span style="--c:#f5c542">schermo</span><span style="--c:#a78bfa">presa</span></div></div>';}
 function keyOf(r){return r.k;}
 function quit(){pause();home();}
 function home(){pause();$('progv').classList.add('hidden');$('player').classList.add('hidden');$('done').classList.add('hidden');$('home').classList.remove('hidden');paintHome();window.scrollTo(0,0);}
@@ -587,16 +672,17 @@ document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 /* ===== motore schermo intero ===== */
 let F=null;
 const COLS={rosso:'#e5243b',blu:'#1f5bd8',nero:'#111111',bianco:'#ffffff'};
-function tgLabel(t){return t.mode==='col'?'il <b style="color:'+COLS[t.target]+'">● '+t.target.toUpperCase()+'</b>':'il numero <b style="color:#e4ff5a">'+t.target+'</b>';}
-function newInner(){const t=F.tg;if(!t)return;const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
+function tgLabel(t){if(t.mode==='sum')return'la <b style="color:#e4ff5a">somma</b> dei numeri';return t.mode==='col'?'il <b style="color:'+COLS[t.target]+'">● '+t.target.toUpperCase()+'</b>':'il numero <b style="color:#e4ff5a">'+t.target+'</b>';}
+function newInner(){const t=F.tg;if(!t)return;
+ if(t.mode==='sum'){const i=$('in');i.className='num';if(t.slots.has(t.i++)){const v=1+Math.floor(Math.random()*4);t.count+=v;t.val=v;i.textContent=v;}else{t.val=null;i.textContent='';}return;}const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
  if(t.slots.has(t.i++))v=t.target;else{do{v=pool[Math.floor(Math.random()*pool.length)];}while(v===t.target||v===t.val);}
  t.val=v;if(v===t.target)t.count++;const i=$('in');
  if(t.mode==='col'){i.className='';i.textContent='';i.style.background=COLS[v];}else{i.className='num';i.textContent=v;}}
 /* quanti cambi avverranno nell'esercizio, poi scelgo a caso quante volte (0-10) e dove compare il bersaglio */
 function nChanges(s){let n=0;for(const ph of s.fs){const D=ph.d*1000;
  if(ph.k==='jump'||ph.k==='rand'){let t=0;while(t<D){n++;t+=ph.from+(ph.to-ph.from)*Math.min(1,t/D);}}else n+=Math.ceil(D/1300);}return n;}
-function planSlots(s){const C=nChanges(s),max=Math.min(10,Math.floor((C-2)/2));
- const N=Math.floor(Math.random()*(max+1)),set=new Set();let guard=0;
+function planSlots(s,sum){const C=nChanges(s),max=Math.min(sum?11:10,Math.floor((C-2)/2));
+ const N=sum?Math.min(max,9+Math.floor(Math.random()*3)):Math.floor(Math.random()*(max+1)),set=new Set();let guard=0;
  while(set.size<N&&guard++<500){const k=1+Math.floor(Math.random()*(C-1));if(!set.has(k)&&!set.has(k-1)&&!set.has(k+1))set.add(k);}
  return set;}
 const GRID=[];for(const x of[-1,0,1])for(const y of[-1,0,1])if(x||y)GRID.push([x,y]);
@@ -606,19 +692,21 @@ function beep(f,d,v){if(!P.snd||!ac)return;try{const o=ac.createOscillator(),g=a
 function openFS(s){const el=$('fs');el.classList.add('on');beepInit();reqWake();
  try{const rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf)rf.call(el);}catch(e){}
  F={s,ph:0,el:0,last:null,paused:false,ji:-1,next:0,nextIn:0,pos:[0,0],raf:0,cdT:null,run:false,tg:null};
- const tm=P.target||'col';
- if(tm!=='off'){const c=Object.keys(COLS);F.tg={mode:tm,target:tm==='col'?c[Math.floor(Math.random()*c.length)]:1+Math.floor(Math.random()*9),count:0,val:null,i:0,slots:planSlots(s)};}
+ const tm=s.nt?'off':(P.target||'col');
+ if(tm==='sum')F.tg={mode:'sum',count:0,val:null,i:0,slots:planSlots(s,1),mp:P.mp?1:0};
+ else if(tm!=='off'){const c=Object.keys(COLS);F.tg={mode:tm,target:tm==='col'?c[Math.floor(Math.random()*c.length)]:1+Math.floor(Math.random()*9),count:0,val:null,i:0,slots:planSlots(s)};}
  const ii=$('in');ii.style.display=F.tg?'flex':'none';ii.textContent='';ii.className='';
  $('dot').style.display='none';$('fs-lab').textContent=s.t;$('fs-t').textContent='';
  let n=3;const show=()=>{const port=innerHeight>innerWidth;
   $('fs-cd').style.display='flex';
-  $('fs-cd').innerHTML='<h3>'+s.t+'</h3><b>'+n+'</b>'+(F.tg?'<small style="font-size:18px;color:#ccc">Conta quante volte compare '+tgLabel(F.tg)+'</small>':'')+'<small>Testa ferma · segui il punto solo con gli occhi</small>'+
+  $('fs-cd').innerHTML='<h3>'+s.t+'</h3><b>'+n+'</b>'+(F.tg?'<small style="font-size:18px;color:#ccc">'+(F.tg.mode==='sum'?'Numeri da 1 a 4, ogni tanto: calcola '+tgLabel(F.tg)+(F.tg.mp?'<br><span class="mp">MATCH POINT · un solo tentativo</span>':''):'Conta quante volte compare '+tgLabel(F.tg))+'</small>':'')+'<small>Testa ferma · segui il punto solo con gli occhi</small>'+
    (port?'<small>Consiglio: ruota in orizzontale per più ampiezza</small>':'');beep(660,.12,.12);};
  show();F.cdT=setInterval(()=>{n--;if(n<=0){clearInterval(F.cdT);F.cdT=null;$('fs-cd').style.display='none';
    $('dot').style.display='block';$('dot').classList.add('flex');F.run=true;beep(990,.18,.18);F.raf=requestAnimationFrame(frame);}else show();},1000);}
 function frame(ts){if(!F)return;
  if(F.last==null)F.last=ts;const dt=Math.min(100,ts-F.last);F.last=ts;if(!F.paused)F.el+=dt;
  const phs=F.s.fs;let ph=phs[F.ph];
+ if(ph.k==='cue'){cueFrame(ph);if(F)F.raf=requestAnimationFrame(frame);return;}
  if(F.el>=ph.d*1000){F.ph++;F.el=0;F.next=0;F.ji=-1;if(F.ph>=phs.length){endFS();return;}ph=phs[F.ph];F.nextIn=0;beep(740,.1,.1);}
  const W=innerWidth,H=innerHeight,m=Math.min(W,H)*.09,top=54,ax=W/2-m,ay=(H-top)/2-m,cx=W/2,cy=top+(H-top)/2;
  const sz=Math.max(F.tg?30:20,Math.round(Math.min(W,H)*(F.tg?.068:.045)));const d=$('dot');d.style.width=d.style.height=sz+'px';
@@ -644,15 +732,48 @@ function confirmAns(e){e.stopPropagation();const real=F.tg.count,ans=F.ans||0;re
  const ok=ans===real;beep(ok?1040:420,.25,.18);
  $('fs-cd').innerHTML='<div class="res">'+(ok?'✔ Esatto: '+real:'Erano <b style="font-size:40px">'+real+'</b><br><small>hai contato '+ans+'</small>')+'</div>';
  setTimeout(()=>{closeFS();left=0;done();},1600);}
-function closeFS(){$('dot').classList.remove('flex');if(F){cancelAnimationFrame(F.raf);if(F.cdT)clearInterval(F.cdT);}F=null;
+const CUES=[{c:'#2fd49f',w:'DESTRA',f:880},{c:'#4f8df5',w:'SINISTRA',f:660},{c:'#e5243b',w:'FERMO',f:330}];
+function cueFrame(ph){const cu=$('cue'),fs=$('fs');$('dot').classList.remove('flex');$('dot').style.display='none';
+ if(F.el>=ph.d*1000){fs.style.background='#000';cu.style.display='none';endFS();return;}
+ if(F.cueEnd&&F.el>=F.cueEnd){F.cueEnd=0;fs.style.background='#000';cu.style.display='flex';cu.innerHTML='<small>pronto…</small>';}
+ if(!F.next)F.next=F.el+ph.min+Math.random()*(ph.max-ph.min);
+ if(F.el>=F.next&&!F.paused){const r=Math.random(),q=r<.4?CUES[0]:r<.8?CUES[1]:CUES[2];
+  fs.style.background=q.c;cu.style.display='flex';cu.innerHTML='<b>'+q.w+'</b>';beep(q.f,.15,.2);if(navigator.vibrate)navigator.vibrate(40);
+  F.cueEnd=F.el+500;F.next=F.el+ph.min+Math.random()*(ph.max-ph.min);}
+ if(!F.cueEnd&&cu.style.display!=='flex'){cu.style.display='flex';cu.innerHTML='<small>pronto…</small>';}
+ $('fs-lab').textContent=F.paused?'❚❚ pausa · tocca per riprendere':ph.l;$('fs-t').textContent=Math.ceil((ph.d*1000-F.el)/1000)+' s';}
+function closeFS(){$('fs').style.background='#000';$('cue').style.display='none';$('dot').classList.remove('flex');if(F){cancelAnimationFrame(F.raf);if(F.cdT)clearInterval(F.cdT);}F=null;
  $('fs').classList.remove('on');$('dot').style.display='none';$('fs-cd').style.display='none';
  try{if(document.fullscreenElement)document.exitFullscreen();else if(document.webkitFullscreenElement)document.webkitExitFullscreen();}catch(e){}
  relWake();}
 function endFS(){if(F.tg){cancelAnimationFrame(F.raf);F.run=false;F.ans=0;$('dot').style.display='none';$('dot').classList.remove('flex');
   $('fs-lab').textContent=F.s.t;$('fs-t').textContent='';$('fs-cd').style.display='flex';
+  if(F.tg.mode==='sum'){F.tries=0;F.aS='';drawSum('');beep(880,.2,.16);return;}
   $('fs-cd').innerHTML='<h3>Quante volte è comparso '+tgLabel(F.tg)+'?</h3><div class="cnt"><button onclick="adj(-1,event)">−</button><b id="ans">0</b><button onclick="adj(1,event)">+</button></div><button class="okb" onclick="confirmAns(event)">Conferma</button>';
   beep(880,.2,.16);return;}
  closeFS();left=0;done();}
+/* ===== Somma ===== */
+function drawSum(hint){const t=F.tg,n=F.tries+1;
+ $('fs-cd').innerHTML='<h3>Quanto fa la somma?</h3>'+
+  '<small style="margin:0 0 6px">'+(t.mp?'<span class="mp">MATCH POINT</span> · un solo tentativo':'Tentativo '+n+' di 3')+'</small>'+
+  '<div class="hintv">'+(hint||'')+'</div><div class="sumv" id="sumv">'+(F.aS||'–')+'</div>'+
+  '<div class="kp">'+[1,2,3,4,5,6,7,8,9].map(d=>'<button onclick="kp('+d+',event)">'+d+'</button>').join('')+
+  '<button onclick="kpDel(event)">⌫</button><button onclick="kp(0,event)">0</button><button onclick="kpClr(event)">C</button></div>'+
+  '<button class="okb" onclick="confirmSum(event)">Conferma</button>';}
+function kp(d,e){e.stopPropagation();if(F.aS.length>=2)return;F.aS=(F.aS==='0'?'':F.aS)+d;$('sumv').textContent=F.aS;}
+function kpDel(e){e.stopPropagation();F.aS=F.aS.slice(0,-1);$('sumv').textContent=F.aS||'–';}
+function kpClr(e){e.stopPropagation();F.aS='';$('sumv').textContent='–';}
+function confirmSum(e){e.stopPropagation();if(F.aS==='')return;const t=F.tg,real=t.count,ans=parseInt(F.aS,10);F.tries++;
+ if(F.tries===1)F.first=ans;const ok=ans===real,last=t.mp||ok||F.tries>=3;
+ if(!last){beep(420,.18,.15);F.aS='';drawSum(ans<real?'▲ Più alto':'▼ Più basso');return;}
+ res[idx]={id:F.s.id,m:'sum',real,ans:F.first,tries:F.tries,mp:t.mp};beep(ok?1040:420,.25,.18);
+ let h;
+ if(t.mp)h=ok?'<b class="mp" style="font-size:44px">PUNTO!</b><br><small>Somma esatta: '+real+'</small>':'Punto perso<br><small>Era <b style="font-size:40px;color:#ddd">'+real+'</b> · hai detto '+ans+'</small>';
+ else if(ok&&F.tries===1)h='✔ Esatto: '+real;
+ else if(ok)h='Trovata al '+F.tries+'° tentativo: '+real+'<br><small>Nei Progressi conta il primo tentativo ('+F.first+')</small>';
+ else h='Era <b style="font-size:40px">'+real+'</b><br><small>primo tentativo '+F.first+'</small>';
+ $('fs-cd').innerHTML='<div class="res">'+h+'</div>';
+ setTimeout(()=>{closeFS();left=0;done();},t.mp?2000:1800);}
 function exitFS(e){e.stopPropagation();closeFS();left=cur.steps[idx].d;paintStep();}
 paintHome();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{});
