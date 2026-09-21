@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1412">
+<title>Vista &amp; Riflessi</title>
+<style>
+:root{
+  --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
+  --tx:#eaf2ee; --tx2:#9db0a8; --teal:#2fd49f; --teal-d:#0f6e56;
+  --coral:#ff8a5c; --coral-d:#993c1d; --ok:#2fd49f;
+  --pad:16px; --r:16px;
+  --acc:var(--teal); --acc-d:var(--teal-d);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--tx);
+  font:400 16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none;
+}
+.wrap{max-width:520px;margin:0 auto;padding:var(--pad) var(--pad) 40px}
+header{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px}
+h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-.2px}
+h1 span{color:var(--teal)}
+.streak{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:13px;color:var(--tx2)}
+.streak b{color:var(--tx);font-weight:600}
+.hint{font-size:13px;color:var(--tx2);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 40px 16px 16px;margin-bottom:12px;
+  display:block;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;position:relative;overflow:hidden}
+.card:active{transform:scale(.99)}
+.card .tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.6px;padding:4px 9px;border-radius:999px;
+  background:rgba(47,212,159,.14);color:var(--teal);margin-bottom:10px}
+.card.coral .tag{background:rgba(255,138,92,.14);color:var(--coral)}
+.card h2{margin:0 0 4px;font-size:18px;font-weight:600}
+.card p{margin:0;color:var(--tx2);font-size:14px}
+.card .meta{margin-top:12px;display:flex;gap:14px;font-size:13px;color:var(--tx2)}
+.card .go{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--tx2);font-size:22px}
+.today{outline:1.5px solid var(--teal);outline-offset:-1.5px}
+.card.coral.today{outline-color:var(--coral)}
+.done-dot{color:var(--ok)}
+/* player */
+.ptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.back{background:none;border:0;color:var(--tx2);font-size:15px;padding:8px 0;cursor:pointer}
+.dots{display:flex;gap:6px;justify-content:center;margin:2px 0 14px;flex-wrap:wrap}
+.dot{width:26px;height:4px;border-radius:2px;background:var(--line)}
+.dot.on{background:var(--acc)}
+.dot.past{background:var(--acc-d)}
+.stage{text-align:center;padding:4px 0 0}
+.stage .num{font-size:12px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase}
+.stage h2{margin:6px 0 2px;font-size:22px;font-weight:600;letter-spacing:-.3px}
+.stage .sub{color:var(--acc);font-size:14px;font-weight:500;min-height:20px}
+.ring{position:relative;width:236px;height:236px;margin:14px auto 6px}
+.ring svg{transform:rotate(-90deg)}
+.ring .time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .tt{font-size:52px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.ring .ts{font-size:12px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.icon{display:flex;justify-content:center;margin:2px 0 8px}
+.instr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;color:var(--tx2);font-size:15px;margin:10px 0 16px}
+.instr b{color:var(--tx);font-weight:500}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:14px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;width:58px;height:58px;
+  font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.btn:active{background:var(--bg2)}
+.btn.main{width:86px;height:86px;background:var(--acc);color:#06120e;border:0;font-size:30px;font-weight:600}
+.btn[disabled]{opacity:.35}
+.checkrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.checkrow.done{border-color:var(--acc-d)}
+.box{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#06120e;flex:0 0 auto}
+.checkrow.done .box{background:var(--acc);border-color:var(--acc)}
+.checkrow .lbl{font-size:14px;flex:1}
+.checkrow.done .lbl{color:var(--tx2);text-decoration:line-through}
+.checkrow .d{font-size:13px;color:var(--tx2);font-variant-numeric:tabular-nums}
+.checkrow.cur{border-color:var(--acc)}
+.sec{font-size:12px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin:18px 0 8px}
+.opt{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:14px}
+.sw{width:46px;height:28px;border-radius:999px;background:var(--line);position:relative;transition:background .15s;flex:0 0 auto}
+.sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#7d8f88;transition:.15s}
+.sw.on{background:var(--acc-d)}.sw.on i{left:21px;background:var(--acc)}
+.week{display:flex;gap:6px;margin-top:4px}
+.day{flex:1;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 0;font-size:11px;color:var(--tx2)}
+.day b{display:block;font-size:15px;color:var(--line);margin-top:3px}
+.day.h b{color:var(--teal)}.day.c b{color:var(--coral)}.day.hc b{color:var(--teal)}
+.big{text-align:center;padding:30px 0 10px}
+.big .em{font-size:56px}
+.big h2{margin:10px 0 6px;font-size:24px}
+.big p{color:var(--tx2);margin:0 0 20px}
+.fill{width:100%;border:0;border-radius:14px;padding:16px;background:var(--acc);color:#06120e;font-size:16px;font-weight:600;cursor:pointer}
+.ghost{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;background:none;color:var(--tx2);font-size:15px;margin-top:8px;cursor:pointer}
+.hidden{display:none}
+.card.amber .tag{background:rgba(245,197,66,.14);color:#f5c542}
+#fs{position:fixed;inset:0;background:#000;z-index:99;display:none;touch-action:none;overflow:hidden}
+#fs.on{display:block}
+#dot{position:absolute;left:0;top:0;border-radius:50%;background:#e4ff5a;
+  box-shadow:0 0 18px 6px rgba(228,255,90,.55),0 0 2px 1px #fff inset;will-change:transform;display:none}
+#fs .hud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:0;right:0;display:flex;align-items:center;
+  justify-content:space-between;padding:0 calc(env(safe-area-inset-right) + 16px) 0 calc(env(safe-area-inset-left) + 16px);
+  color:#4a4a4a;font-size:14px;font-variant-numeric:tabular-nums;pointer-events:none}
+#fs .x{pointer-events:auto;background:none;border:1px solid #2a2a2a;color:#666;border-radius:999px;padding:7px 14px;font-size:14px}
+#fs .cd{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#888;text-align:center;padding:20px}
+#fs .cd b{font-size:96px;font-weight:200;color:#d0d0d0;line-height:1}
+#fs .cd h3{font-size:20px;font-weight:500;color:#bbb;margin:0 0 18px}
+#dot.flex{display:flex!important;align-items:center;justify-content:center}
+#in{border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#in.num{box-shadow:none;background:none!important;color:#111;font-weight:800;line-height:1;font-family:-apple-system,Roboto,sans-serif}
+#fs .cnt{display:flex;align-items:center;gap:26px;margin:10px 0 22px}
+#fs .cnt b{font-size:72px;min-width:90px}
+#fs .cnt button,#fs .okb{background:#161616;border:1px solid #333;color:#ddd;border-radius:999px;font-size:30px;width:64px;height:64px}
+#fs .okb{width:auto;height:auto;font-size:17px;padding:14px 34px;background:#e4ff5a;color:#111;border:0;font-weight:600}
+#fs .res{font-size:22px;color:#ddd}
+.seg{background:var(--bg2);border:1px solid var(--line);color:var(--tx);border-radius:999px;padding:6px 14px;font-size:13px}
+#fs .cd small{display:block;font-size:15px;max-width:340px;margin-top:14px;color:#777}
+.inp{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--tx);border-radius:12px;
+  padding:13px 14px;font-size:16px;-webkit-user-select:text;user-select:text;margin-bottom:8px}
+.inp::placeholder{color:#5e6f69}
+.row2{display:flex;gap:8px;margin-top:8px}
+.nav{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#1b2b26,#182521);border:1px solid var(--line);
+  border-radius:var(--r);padding:14px 16px;margin-top:12px;cursor:pointer;width:100%;color:inherit;font:inherit;text-align:left}
+.nav .ic{width:40px;height:40px;border-radius:12px;background:rgba(47,212,159,.14);display:flex;align-items:center;justify-content:center;font-size:20px}
+.nav b{display:block;font-weight:600}.nav small{color:var(--tx2);font-size:13px}
+.nav .go2{margin-left:auto;color:var(--tx2);font-size:22px}
+.segs{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:3px;margin:4px 0 12px}
+.segs button{flex:1;background:none;border:0;color:var(--tx2);font:inherit;font-size:13px;padding:8px 0;border-radius:9px;cursor:pointer}
+.segs button.on{background:var(--card);color:var(--tx);box-shadow:0 0 0 1px var(--line)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.tile small{display:block;color:var(--tx2);font-size:12px;letter-spacing:.3px}
+.tile b{display:block;font-size:26px;font-weight:600;letter-spacing:-.5px;margin-top:2px;font-variant-numeric:tabular-nums}
+.tile i{font-style:normal;font-size:12px}
+.up{color:#2fd49f}.dn{color:#ff8a5c}.eq{color:var(--tx2)}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px 10px;margin-bottom:12px}
+.chart h4{margin:0 2px 2px;font-size:14px;font-weight:600}
+.chart p{margin:0 2px 8px;font-size:12px;color:var(--tx2)}
+.chart svg{display:block;width:100%;height:auto}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--tx2);margin:6px 2px 0}
+.leg span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.advice{background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.35);border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:12px}
+.empty{text-align:center;color:var(--tx2);padding:30px 10px;font-size:14px}
+textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
+.note{font-size:12px;color:var(--tx2);margin:6px 2px 0}
+.row2>*{flex:1}
+.sum{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:left;margin-bottom:14px}
+.sum .l{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;color:var(--tx2)}
+.sum .l b{color:var(--tx);font-weight:500}
+.sum hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.sum .ex{font-size:13px;color:var(--tx2);padding:2px 0}
+.wa{background:#25D366;color:#04140b}
+.gc{background:#4285F4;color:#04101f}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="home">
+  <header>
+    <h1>Vista <span>&amp;</span> Riflessi</h1>
+    <div class="streak"><span>🔥</span><b id="streak">0</b> giorni</div>
+  </header>
+  <p class="hint" id="today-hint"></p>
+
+  <button class="card" id="c-casa" onclick="start('casa')">
+    <span class="tag">LUN · MER · VEN</span>
+    <h2>A casa <span id="d-casa" class="done-dot"></span></h2>
+    <p>Muscoli oculari e coordinazione di base</p>
+    <div class="meta"><span>8 esercizi</span><span>~7 min</span><span>📱 4 a schermo</span></div>
+    <span class="go">›</span>
+  </button>
+
+  <button class="card coral" id="c-campo" onclick="start('campo')">
+    <span class="tag">MAR · GIO</span>
+    <h2>Prima del match <span id="d-campo" class="done-dot"></span></h2>
+    <p>Riflessi immediati e reattività sotto rete</p>
+    <div class="meta"><span>3 esercizi</span><span>4 min</span></div>
+    <span class="go">›</span>
+  </button>
+
+  <button class="card amber" id="c-schermo" onclick="start('schermo')">
+    <span class="tag">OGNI GIORNO · IPAD</span>
+    <h2>Allenatore visivo <span id="d-schermo" class="done-dot"></span></h2>
+    <p>Punto luminoso a schermo intero da seguire con gli occhi</p>
+    <div class="meta"><span>5 esercizi</span><span>2,5 min</span></div>
+    <span class="go">›</span>
+  </button>
+
+  <div class="sec">Questa settimana</div>
+  <div class="week" id="week"></div>
+
+  <button class="nav" onclick="showProg()">
+    <div class="ic">📈</div><div><b>Progressi</b><small id="nav-sub">Precisione e attenzione nel tempo</small></div><span class="go2">›</span>
+  </button>
+
+  <div class="sec">Backup storico</div>
+  <div class="row2">
+    <button class="ghost" style="margin:0" onclick="backupFile()">💾 Salva backup</button>
+    <button class="ghost" style="margin:0" onclick="$('fin').click()">📂 Ripristina file</button>
+  </div>
+  <div class="row2">
+    <button class="ghost" style="margin:0" onclick="expAll()">💬 WhatsApp</button>
+    <button class="ghost" style="margin:0" onclick="pasteOpen()">📋 Incolla codice</button>
+  </div>
+  <input type="file" id="fin" accept=".json,.txt,application/json,text/plain" class="hidden" onchange="restoreFile(this)">
+  <div id="paste" class="hidden" style="margin-top:8px">
+    <textarea class="inp" id="pastebox" placeholder="Incolla qui il messaggio WhatsApp (o il codice VR1:…)"></textarea>
+    <div class="row2" style="margin-top:0"><button class="ghost" style="margin:0" onclick="$('paste').classList.add('hidden')">Annulla</button>
+    <button class="fill" onclick="restoreText($('pastebox').value)">Ripristina</button></div>
+  </div>
+  <p class="note" id="bk-info"></p>
+
+  <div class="sec">Chi esegue la routine</div>
+  <input class="inp" id="uname" placeholder="Nome e cognome" oninput="setName(this.value)">
+
+  <div class="sec">Impostazioni</div>
+  <div class="opt">Avanzamento automatico <div class="sw" id="sw-auto" onclick="tog('auto')"><i></i></div></div>
+  <div class="opt">Bersaglio interno (attenzione) <button class="seg" id="tg-btn" onclick="cycTg()">Colori</button></div>
+  <div class="opt">Suono e vibrazione <div class="sw on" id="sw-snd" onclick="tog('snd')"><i></i></div></div>
+  <div class="opt">Schermo sempre acceso <div class="sw on" id="sw-wake" onclick="tog('wake')"><i></i></div></div>
+</div>
+
+<div id="progv" class="hidden">
+  <div class="ptop"><button class="back" onclick="home()">‹ Home</button><div class="streak">📈 Progressi</div></div>
+  <div class="segs" id="seg-per">
+    <button data-v="28" onclick="setPer(28)">4 sett.</button><button data-v="56" onclick="setPer(56)">8 sett.</button><button data-v="0" onclick="setPer(0)">Tutto</button>
+  </div>
+  <div class="segs" id="seg-mod">
+    <button data-v="all" onclick="setMod('all')">Tutti</button><button data-v="col" onclick="setMod('col')">Colori</button><button data-v="num" onclick="setMod('num')">Numeri</button>
+  </div>
+  <div id="prog-body"></div>
+</div>
+
+<div id="player" class="hidden">
+  <div class="ptop">
+    <button class="back" onclick="quit()">‹ Esci</button>
+    <div class="streak" id="rname"></div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="stage">
+    <div class="num" id="p-num"></div>
+    <h2 id="p-title"></h2>
+    <div class="sub" id="p-sub"></div>
+  </div>
+  <div class="ring">
+    <svg width="236" height="236" viewBox="0 0 236 236">
+      <circle cx="118" cy="118" r="104" fill="none" stroke="#26332e" stroke-width="10"/>
+      <circle id="prog" cx="118" cy="118" r="104" fill="none" stroke="currentColor" stroke-width="10"
+        stroke-linecap="round" stroke-dasharray="653.5" stroke-dashoffset="0"/>
+    </svg>
+    <div class="time"><div class="tt" id="p-time">0:30</div><div class="ts" id="p-state">in pausa</div></div>
+  </div>
+  <div class="icon" id="p-icon"></div>
+  <div class="instr" id="p-instr"></div>
+  <div class="ctrls" style="gap:10px">
+    <button class="btn" id="b-prev" onclick="go(-1)">‹</button>
+    <button class="fill" id="b-play" onclick="toggle()" style="flex:1">▶ Inizia esercizio</button>
+    <button class="btn" id="b-next" onclick="go(1)">›</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<div id="done" class="hidden">
+  <div class="big">
+    <div class="em">✅</div>
+    <h2>Routine completata</h2>
+    <p id="done-txt"></p>
+  </div>
+  <div class="sum" id="sum"></div>
+  <button class="fill wa" onclick="shareWA()">Invia su WhatsApp</button>
+  <div class="row2">
+    <button class="fill gc" onclick="shareGCal()">Google Calendar</button>
+    <button class="ghost" onclick="shareICS()">Calendario iPad (.ics)</button>
+  </div>
+  <div class="row2">
+    <button class="ghost" onclick="copyTxt()">Copia testo</button>
+    <button class="ghost" onclick="start(keyOf(cur))">Ripeti</button>
+  </div>
+  <button class="ghost" onclick="home()" style="margin-top:14px">Torna alla home</button>
+</div>
+
+</div>
+<div id="fs">
+  <div class="hud"><span id="fs-lab"></span><span id="fs-t"></span><button class="x" onclick="exitFS(event)">✕ Esci</button></div>
+  <div id="dot"><span id="in"></span></div>
+  <div class="cd" id="fs-cd"></div>
+</div>
+<script>
+const ICONS={
+ sacc:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="42" cy="22" rx="16" ry="10"/><ellipse cx="78" cy="22" rx="16" ry="10"/><circle cx="42" cy="22" r="4.5" fill="currentColor"/><circle cx="78" cy="22" r="4.5" fill="currentColor"/><path d="M24 48h72M28 44l-5 4 5 4M92 44l5 4-5 4"/></g></svg>',
+ saccv:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="42" cy="32" rx="16" ry="10"/><ellipse cx="78" cy="32" rx="16" ry="10"/><circle cx="42" cy="32" r="4.5" fill="currentColor"/><circle cx="78" cy="32" r="4.5" fill="currentColor"/><path d="M104 10v44M100 14l4-5 4 5M100 50l4 5 4-5"/></g></svg>',
+ fuoco:'<svg width="140" height="64" viewBox="0 0 140 64"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="24" cy="32" rx="16" ry="10"/><circle cx="24" cy="32" r="4.5" fill="currentColor"/><circle cx="62" cy="32" r="7" fill="currentColor"/><circle cx="116" cy="32" r="3" fill="currentColor"/><path stroke-dasharray="4 4" d="M44 32h66"/></g></svg>',
+ muro:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6v58" stroke-width="4"/><path d="M18 16l10 7M18 30l10 7M18 44l10 7"/><path d="M26 46C46 22 78 16 104 34"/><circle cx="46" cy="28" r="7"/><rect x="96" y="30" width="26" height="22" rx="8"/><path d="M104 30v-8M112 30v-8"/></g></svg>',
+ peri:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="26" cy="35" rx="16" ry="10"/><circle cx="26" cy="35" r="4.5" fill="currentColor"/><path d="M46 35h58M98 31l6 4-6 4"/><path stroke-dasharray="4 4" d="M44 35l52-26M44 35l52 26"/><circle cx="104" cy="58" r="7"/></g></svg>',
+ racc:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="34" cy="26" rx="20" ry="24"/><path d="M34 50v16"/><circle cx="116" cy="20" r="5" fill="currentColor"/><path d="M58 34l50-12M62 30l-5 5 6 4M104 26l5-5-6-4"/></g></svg>',
+ rapid:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6v58" stroke-width="4"/><path d="M18 16l10 7M18 44l10 7"/><path d="M94 24H32M36 20l-5 4 5 4M32 46h62M90 42l5 4-5 4"/><circle cx="112" cy="35" r="8"/></g></svg>',
+ diag:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="12" r="5" fill="currentColor"/><circle cx="96" cy="52" r="5" fill="currentColor"/><circle cx="96" cy="12" r="5"/><circle cx="24" cy="52" r="5"/><path d="M32 17l56 30M88 17L32 47" stroke-dasharray="4 4"/></g></svg>',
+ rand:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="currentColor" stroke="none"><circle cx="20" cy="12" r="4" opacity=".35"/><circle cx="60" cy="12" r="4" opacity=".35"/><circle cx="100" cy="12" r="4" opacity=".35"/><circle cx="20" cy="32" r="4" opacity=".35"/><circle cx="60" cy="32" r="4" opacity=".35"/><circle cx="100" cy="32" r="7"/><circle cx="20" cy="52" r="4" opacity=".35"/><circle cx="60" cy="52" r="4" opacity=".35"/><circle cx="100" cy="52" r="4" opacity=".35"/></g></svg>',
+ purs:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M60 32C44 10 18 10 18 32s26 22 42 0 42-22 42 0-26 22-42 0" stroke-dasharray="4 4"/><circle cx="102" cy="32" r="6" fill="currentColor"/></g></svg>',
+ scritte:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="52" cy="35" r="24"/><path d="M28 35h48"/><text x="52" y="30" font-size="16" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">A7</text><path stroke-dasharray="4 4" d="M84 22h18M84 35h22M84 48h18"/></g></svg>'
+};
+const FSX='iPad a <b>40–50 cm</b>, luce ambiente normale. <b>Testa ferma</b>: segui il punto solo con gli occhi. Tocca lo schermo per mettere in pausa.';
+const FS={
+ H:{t:'Saccadi orizzontali',s:'schermo · 30 sec',d:30,i:'sacc',fs:[{k:'jump',l:'◀ ▶',pts:[[-1,0],[1,0]],from:1000,to:520,d:30}]},
+ V:{t:'Saccadi verticali',s:'schermo · 30 sec',d:30,i:'saccv',fs:[{k:'jump',l:'▲ ▼',pts:[[0,-1],[0,1]],from:1000,to:520,d:30}]},
+ D:{t:'Saccadi diagonali',s:'schermo · 30 sec',d:30,i:'diag',fs:[
+   {k:'jump',l:'↖ ↘',pts:[[-1,-1],[1,1]],from:950,to:600,d:15},
+   {k:'jump',l:'↗ ↙',pts:[[1,-1],[-1,1]],from:950,to:600,d:15}]},
+ X:{t:'Saccadi a sorpresa',s:'schermo · 30 sec',d:30,i:'rand',fs:[{k:'rand',l:'reattività',from:900,to:480,d:30}]},
+ S:{t:'Inseguimento lento',s:'schermo · 30 sec',d:30,i:'purs',fs:[
+   {k:'h',l:'orizzontale',per:4000,d:10},{k:'v',l:'verticale',per:4000,d:10},{k:'8',l:'otto',per:6000,d:10}]}
+};
+for(const k in FS){FS[k].x=FSX;FS[k].id=k;}
+const R={
+ casa:{k:'casa',name:'A casa',acc:'teal',days:[1,3,5],steps:[
+  FS.H,FS.V,FS.D,FS.S,
+  {t:'Fuoco vicino / lontano',s:'60 sec',d:60,i:'fuoco',x:'Fissa il dito vicino al naso per <b>2 secondi</b>, poi un punto lontano per <b>2 secondi</b>. Alterna senza pause.'},
+  {t:'Tracciamento al muro',s:'mano destra · 60 sec',d:60,i:'muro',x:'Lancia la pallina al muro, un rimbalzo, presa con la <b>destra</b>. Occhi incollati sul palmo fino alla presa.'},
+  {t:'Tracciamento al muro',s:'mano sinistra · 60 sec',d:60,i:'muro',x:'Stessa cosa con la <b>sinistra</b>. Se ti scappa, rallenta il lancio: conta la presa pulita, non la velocità.'},
+  {t:'Visione periferica',s:'90 sec',d:90,i:'peri',x:'Fissa un punto dritto sul muro. Lancia e afferra la pallina <b>di lato</b>, usando solo la coda dell\'occhio. Non spostare lo sguardo.'}
+ ]},
+ campo:{k:'campo',name:'Prima del match',acc:'coral',days:[2,4],steps:[
+  {t:'Saccadi veloci',s:'30 sec',d:30,i:'racc',x:'Salta con lo sguardo tra un <b>punto lontano</b> (fondo campo) e la <b>punta della racchetta</b>. Ritmo rapido.'},
+  {t:'Tracciamento rapido',s:'90 sec',d:90,i:'rapid',x:'Lanci veloci contro il muro, presa a una mano. Serve a <b>calibrare l\'occhio</b>, non a stancarti.'},
+  {t:'Trucco delle scritte',s:'durante il palleggio · 120 sec',d:120,i:'scritte',x:'Sforzati di <b>leggere le lettere o i numeri</b> scritti a pennarello sulle palline mentre il compagno te le lancia.'}
+ ]},
+ schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
+};
+const $=id=>document.getElementById(id);
+const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
+const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
+const SS=JSON.parse(localStorage.getItem('vr-sess')||'[]');
+const DAYS=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+let res=[];let cur=null,idx=0,left=0,run=false,tick=null,dn=[],wl=null,ac=null,t0=null,lastSess=null;
+
+function save(){localStorage.setItem('vr-pref',JSON.stringify(P));localStorage.setItem('vr-log',JSON.stringify(L));
+ localStorage.setItem('vr-sess',JSON.stringify(SS.slice(-300)));}
+function setName(v){P.name=v.trim();save();}
+function hm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function itDate(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+function key(d){return d.toISOString().slice(0,10);}
+function tog(k){P[k]=P[k]?0:1;save();paintSw();if(k==='wake'&&!P.wake)relWake();}
+function cycTg(){P.target={off:'col',col:'num',num:'off'}[P.target||'col'];save();paintSw();}
+function paintSw(){$('tg-btn').textContent={off:'Spento',col:'Colori',num:'Numeri'}[P.target||'col'];$('sw-auto').className='sw'+(P.auto?' on':'');$('sw-snd').className='sw'+(P.snd?' on':'');$('sw-wake').className='sw'+(P.wake?' on':'');}
+
+function streak(){let n=0,d=new Date();if(!(L[key(d)]||[]).length)d.setDate(d.getDate()-1);
+ while((L[key(d)]||[]).length){n++;d.setDate(d.getDate()-1);}return n;}
+
+function paintHome(){
+ const t=new Date(),k=key(t),today=L[k]||[],wd=t.getDay();
+ $('streak').textContent=streak();
+ $('d-casa').textContent=today.includes('casa')?' ✓':'';
+ $('d-campo').textContent=today.includes('campo')?' ✓':'';
+ $('d-schermo').textContent=today.includes('schermo')?' ✓':'';
+ $('c-casa').classList.toggle('today',R.casa.days.includes(wd));
+ $('c-campo').classList.toggle('today',R.campo.days.includes(wd));
+ $('uname').value=P.name||'';
+ const nm=DAYS[wd];
+ $('today-hint').textContent = R.casa.days.includes(wd)?'Oggi è '+nm+': routine a casa.'
+   : R.campo.days.includes(wd)?'Oggi è '+nm+': attivazione prima del match.'
+   : 'Oggi è '+nm+': giorno libero. Se vuoi, fai comunque la routine a casa.';
+ const lab=['L','M','M','G','V','S','D'],w=$('week');w.innerHTML='';
+ const mon=new Date(t);mon.setDate(t.getDate()-((t.getDay()+6)%7));
+ for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const v=L[key(d)]||[];
+  const e=document.createElement('div');e.className='day'+(v.includes('casa')?' h':'')+(v.includes('campo')?' c':'');
+  e.innerHTML=lab[i]+'<b>'+(v.length?'●':'○')+'</b>';w.appendChild(e);}
+ paintSw();paintBk();
+ const lm=[];for(let i=SS.length-1;i>=0&&lm.length<1;i--)if(SS[i].att)lm.push(SS[i].att);
+ $('nav-sub').textContent=lm.length?'Ultima sessione: conteggi esatti '+lm[0]:'Precisione e attenzione nel tempo';
+}
+
+function start(k){cur=R[k];idx=0;dn=[];res=[];left=cur.steps[0].d;run=false;t0=new Date();
+ const AC={teal:['#2fd49f','#0f6e56'],coral:['#ff8a5c','#993c1d'],amber:['#f5c542','#7a5a0c']}[cur.acc];
+ document.documentElement.style.setProperty('--acc',AC[0]);document.documentElement.style.setProperty('--acc-d',AC[1]);
+ $('home').classList.add('hidden');$('done').classList.add('hidden');$('player').classList.remove('hidden');
+ $('rname').textContent=cur.name;paintStep();window.scrollTo(0,0);}
+
+function paintStep(){
+ const s=cur.steps[idx];
+ $('p-num').textContent='Esercizio '+(idx+1)+' di '+cur.steps.length;
+ $('p-title').textContent=s.t;$('p-sub').textContent=s.s;
+ $('p-instr').innerHTML=s.x;$('p-icon').innerHTML=ICONS[s.i];
+ $('p-icon').style.color='var(--acc)';$('prog').style.color='var(--acc)';
+ $('b-prev').disabled=idx===0;
+ $('dots').innerHTML=cur.steps.map((_,i)=>'<div class="dot '+(i===idx?'on':dn[i]?'past':'')+'"></div>').join('');
+ $('list').innerHTML=cur.steps.map((e,i)=>'<div class="checkrow'+(dn[i]?' done':'')+(i===idx?' cur':'')+'" onclick="jump('+i+')">'+
+   '<div class="box">'+(dn[i]?'✓':'')+'</div><div class="lbl">'+e.t+(e.fs?' 📱':'')+'</div><div class="d">'+fmt(e.d)+'</div></div>').join('');
+ paintTime();
+}
+function fmt(n){return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
+function paintTime(){
+ const s=cur.steps[idx];$('p-time').textContent=fmt(Math.max(0,left));
+ $('p-state').textContent=run?'in corso':(left===s.d?'pronto':'in pausa');
+ $('prog').style.strokeDashoffset=653.5*(1-left/s.d);
+ $('b-play').textContent=s.fs?'▶  Avvia a schermo intero':(run?'❚❚  Pausa':(left===s.d?'▶  Inizia esercizio':'▶  Riprendi'));
+}
+function toggle(){const s=cur.steps[idx];if(s.fs&&!run){openFS(s);return;}run?pause():play();}
+function play(){if(run)return;run=true;beepInit();reqWake();
+ tick=setInterval(()=>{left--;if(left<=0){clearInterval(tick);run=false;done();}paintTime();},1000);paintTime();}
+function pause(){run=false;clearInterval(tick);relWake();paintTime();}
+function done(){dn[idx]=1;signal();
+ if(idx<cur.steps.length-1){idx++;left=cur.steps[idx].d;paintStep();if(P.auto)setTimeout(play,900);}
+ else{finish();}}
+function go(n){pause();const i=idx+n;if(i<0)return;if(i>=cur.steps.length){finish();return;}
+ if(n>0)dn[idx]=1;idx=i;left=cur.steps[idx].d;paintStep();}
+function jump(i){pause();idx=i;left=cur.steps[i].d;paintStep();}
+function finish(){pause();
+ const end=new Date(),st=t0||end,k=key(end);
+ L[k]=L[k]||[];if(!L[k].includes(keyOf(cur)))L[k].push(keyOf(cur));
+ const ndone=dn.filter(Boolean).length;
+ lastSess={r:cur.name,rk:keyOf(cur),name:P.name||'',day:DAYS[end.getDay()],date:itDate(end),
+   iso:k,start:hm(st),end:hm(end),min:Math.max(1,Math.round((end-st)/60000)),
+   n:ndone,tot:cur.steps.length,ex:cur.steps.map((e,i)=>(dn[i]?'✓ ':'· ')+e.t+' ('+e.s+')'+(res[i]?' · conteggio '+res[i].ans+'/'+res[i].real+(res[i].ans===res[i].real?' ✔':''):'')),
+   att:res.filter(Boolean).length?res.filter(r=>r&&r.ans===r.real).length+'/'+res.filter(Boolean).length:'',
+   ms:st.getTime(),me:end.getTime()};
+ lastSess.rs=res.filter(Boolean);SS.push(lastSess);save();
+ $('player').classList.add('hidden');$('done').classList.remove('hidden');
+ $('done-txt').textContent='Serie: '+streak()+' giorni consecutivi';
+ $('sum').innerHTML=
+   (lastSess.name?'<div class="l"><span>Atleta</span><b>'+esc(lastSess.name)+'</b></div>':'')+
+   '<div class="l"><span>Routine</span><b>'+lastSess.r+'</b></div>'+
+   '<div class="l"><span>Giorno</span><b>'+lastSess.day+' '+lastSess.date+'</b></div>'+
+   '<div class="l"><span>Orario</span><b>'+lastSess.start+' – '+lastSess.end+'</b></div>'+
+   '<div class="l"><span>Durata</span><b>'+lastSess.min+' min</b></div>'+
+   '<div class="l"><span>Esercizi</span><b>'+lastSess.n+'/'+lastSess.tot+'</b></div>'+
+   (lastSess.att?'<div class="l"><span>Conteggi esatti</span><b>'+lastSess.att+'</b></div>':'')+'<hr>'+
+   lastSess.ex.map(e=>'<div class="ex">'+esc(e)+'</div>').join('');
+ window.scrollTo(0,0);}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function sessText(s){return '👁️ VISTA & RIFLESSI\n'+(s.name?'Atleta: '+s.name+'\n':'')+
+ 'Routine: '+s.r+'\n'+s.day.charAt(0).toUpperCase()+s.day.slice(1)+' '+s.date+' · '+s.start+'–'+s.end+' ('+s.min+' min)\n'+
+ 'Esercizi: '+s.n+'/'+s.tot+(s.att?'\nConteggi esatti: '+s.att:'')+'\n\n'+s.ex.join('\n');}
+function shareWA(){const t=sessText(lastSess);
+ if(navigator.share){navigator.share({text:t}).catch(()=>waLink(t));}else waLink(t);}
+function waLink(t){window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}
+function gfmt(ms){return new Date(ms).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';}
+function shareGCal(){const s=lastSess;
+ const u='https://calendar.google.com/calendar/render?action=TEMPLATE'+
+  '&text='+encodeURIComponent('Vista & Riflessi · '+s.r)+
+  '&dates='+gfmt(s.ms)+'/'+gfmt(s.me)+
+  '&details='+encodeURIComponent(sessText(s));
+ window.open(u,'_blank');}
+function shareICS(){const s=lastSess;
+ const ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//VistaRiflessi//IT\r\nBEGIN:VEVENT\r\nUID:'+s.ms+'@vistariflessi\r\n'+
+  'DTSTAMP:'+gfmt(Date.now())+'\r\nDTSTART:'+gfmt(s.ms)+'\r\nDTEND:'+gfmt(s.me)+'\r\n'+
+  'SUMMARY:Vista & Riflessi - '+s.r+'\r\nDESCRIPTION:'+sessText(s).replace(/\n/g,'\\n')+'\r\nEND:VEVENT\r\nEND:VCALENDAR';
+ dl(ics,'sessione-'+s.iso+'.ics','text/calendar');}
+function copyTxt(){const t=sessText(lastSess);
+ if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>alert('Testo copiato.'),()=>prompt('Copia:',t));
+ else prompt('Copia:',t);}
+function dl(txt,fn,mime){const b=new Blob([txt],{type:(mime||'text/plain')+';charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;document.body.appendChild(a);a.click();
+ setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
+function allText(){if(!SS.length)return'Nessuna sessione registrata.';
+ return '👁️ VISTA & RIFLESSI · STORICO'+(P.name?'\nAtleta: '+P.name:'')+'\nSessioni: '+SS.length+'\n\n'+
+  SS.slice().reverse().slice(0,40).map(s=>s.date+' ('+s.day+') '+s.start+' · '+s.r+' · '+s.n+'/'+s.tot+' es'+(s.att?' · conteggi '+s.att:'')).join('\n')+
+  (SS.length>40?'\n… ('+(SS.length-40)+' sessioni precedenti nel codice)':'');}
+/* backup compatto */
+function packAll(){return{v:1,name:P.name||'',ss:SS.map(s=>({k:s.rk,a:s.ms,b:s.me,n:s.n,t:s.tot,r:(s.rs||[]).map(x=>[x.id,x.m,x.real,x.ans])}))};}
+function b64e(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
+function b64d(t){return JSON.parse(decodeURIComponent(escape(atob(t))));}
+function code(){return 'VR1:'+b64e(packAll());}
+function expAll(){const t=allText()+'\n\n— Codice backup (per ripristinare incollalo nell\'app) —\n'+code();
+ if(navigator.share)navigator.share({text:t}).catch(()=>{});else waLink(t);markBackup();}
+async function backupFile(){const d=new Date(),fn='vista-riflessi-backup-'+key(d)+'.json';
+ const txt=JSON.stringify(packAll());
+ try{const f=new File([txt],fn,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Backup Vista & Riflessi'});markBackup();return;}}catch(e){if(e&&e.name==='AbortError')return;}
+ dl(txt,fn,'application/json');markBackup();}
+function markBackup(){P.bk=Date.now();save();paintBk();}
+function paintBk(){const n=SS.length;let t=n+' sessioni salvate su questo dispositivo.';
+ if(P.bk){const g=Math.floor((Date.now()-P.bk)/864e5);t+=' Ultimo backup: '+(g===0?'oggi':g===1?'ieri':g+' giorni fa')+'.';
+  if(g>=7)t+=' ⚠︎ Consigliato farne uno nuovo.';}else if(n)t+=' ⚠︎ Nessun backup ancora.';
+ $('bk-info').textContent=t;}
+function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
+function restoreFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>restoreText(String(r.result));r.readAsText(f);inp.value='';}
+function restoreText(t){let o=null;t=String(t||'').trim();
+ try{const m=t.match(/VR1:([A-Za-z0-9+\/=]+)/);o=m?b64d(m[1]):JSON.parse(t);}catch(e){}
+ if(!o||!Array.isArray(o.ss)){alert('Codice o file non riconosciuto.');return;}
+ const have=new Set(SS.map(s=>s.ms));let add=0;
+ for(const c of o.ss){if(have.has(c.a))continue;const R0=R[c.k]||R.casa,st=new Date(c.a),en=new Date(c.b);
+  SS.push({r:R0.name,rk:c.k,name:o.name||'',day:DAYS[en.getDay()],date:itDate(en),iso:key(en),start:hm(st),end:hm(en),
+   min:Math.max(1,Math.round((c.b-c.a)/60000)),n:c.n,tot:c.t,ex:[],ms:c.a,me:c.b,
+   rs:(c.r||[]).map(x=>({id:x[0],m:x[1],real:x[2],ans:x[3]})),
+   att:(c.r&&c.r.length)?c.r.filter(x=>x[2]===x[3]).length+'/'+c.r.length:''});
+  const k=key(en);L[k]=L[k]||[];if(!L[k].includes(c.k))L[k].push(c.k);add++;}
+ SS.sort((a,b)=>a.ms-b.ms);if(!P.name&&o.name)P.name=o.name;save();
+ $('paste').classList.add('hidden');$('pastebox').value='';paintHome();
+ alert(add?'Ripristinate '+add+' sessioni.':'Nessuna sessione nuova: lo storico era già aggiornato.');}
+
+/* ===== progressi ===== */
+let PER=28,MOD='all';
+const EXN={H:'Orizzontali',V:'Verticali',D:'Diagonali',X:'A sorpresa',S:'Inseguimento'};
+function setPer(v){PER=v;paintProg();}function setMod(v){MOD=v;paintProg();}
+function segOn(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',b.dataset.v==String(v)));}
+function showProg(){$('home').classList.add('hidden');$('progv').classList.remove('hidden');paintProg();window.scrollTo(0,0);}
+function monday(d){const m=new Date(d);m.setHours(0,0,0,0);m.setDate(m.getDate()-((m.getDay()+6)%7));return m;}
+function stats(list){let n=0,ok=0,er=0;for(const r of list){n++;if(r.ans===r.real)ok++;er+=Math.abs(r.ans-r.real)/Math.max(1,r.real);}
+ return n?{n,ok:ok/n*100,er:er/n*100}:null;}
+function trs(from,to){const out=[];for(const s of SS){if(s.ms<from||s.ms>=to)continue;for(const r of(s.rs||[]))if(MOD==='all'||r.m===MOD)out.push(r);}return out;}
+function delta(a,b,inv){if(a==null||b==null)return'<i class="eq">—</i>';const d=Math.round(a-b);
+ if(Math.abs(d)<1)return'<i class="eq">= stabile</i>';const good=inv?d<0:d>0;return'<i class="'+(good?'up':'dn')+'">'+(d>0?'▲ +':'▼ ')+d+(inv?' pt':' pt')+'</i>';}
+function paintProg(){segOn('seg-per',PER);segOn('seg-mod',MOD);
+ const now=Date.now(),D=864e5,span=PER||Math.max(28,Math.ceil((now-(SS[0]?SS[0].ms:now))/D)+1);
+ const cur_=stats(trs(now-span*D,now+1)),prev=PER?stats(trs(now-2*span*D,now-span*D)):null;
+ const nSess=SS.filter(s=>s.ms>=now-span*D).length;
+ let h='';
+ if(!SS.some(s=>(s.rs||[]).length)){$('prog-body').innerHTML='<div class="empty">Ancora nessun dato di precisione.<br>Completa un esercizio a schermo con il bersaglio attivo e qui comparirà il tuo andamento.</div>'+heat();return;}
+ h+='<div class="tiles">'+
+  '<div class="tile"><small>Conteggi esatti</small><b>'+(cur_?Math.round(cur_.ok)+'%':'—')+'</b>'+delta(cur_&&cur_.ok,prev&&prev.ok)+'</div>'+
+  '<div class="tile"><small>Errore medio</small><b>'+(cur_?Math.round(cur_.er)+'%':'—')+'</b>'+delta(cur_&&cur_.er,prev&&prev.er,true)+'</div>'+
+  '<div class="tile"><small>Sessioni</small><b>'+nSess+'</b><i class="eq">'+(PER?'ultimi '+PER+' giorni':'totali')+'</i></div>'+
+  '<div class="tile"><small>Prove misurate</small><b>'+(cur_?cur_.n:0)+'</b><i class="eq">esercizi con conteggio</i></div></div>';
+ h+=advice();
+ h+=weekChart(PER?PER/7:Math.min(12,Math.ceil(span/7)));
+ h+=exChart(span);
+ h+=heat();
+ h+='<p class="note">Il miglioramento vero è la tendenza su 3–4 settimane. Confronta i periodi con lo stesso livello (Colori o Numeri).</p>';
+ $('prog-body').innerHTML=h;}
+function advice(){const last=[];for(let i=SS.length-1;i>=0&&last.length<25;i--)for(const r of(SS[i].rs||[]))last.push(r);
+ const lvl=P.target||'col',rec=last.filter(r=>r.m===lvl).slice(0,15),st=stats(rec);if(!st||st.n<10)return'';
+ if(lvl==='col'&&st.ok>=85)return'<div class="advice">🎯 <b>Pronto per salire di livello.</b> '+Math.round(st.ok)+'% esatti nelle ultime prove a Colori: passa a <b>Numeri</b> in Impostazioni.</div>';
+ if(st.ok<40)return'<div class="advice">🐢 Precisione bassa nelle ultime prove ('+Math.round(st.ok)+'%). Qualità prima della velocità'+(lvl==='num'?': torna a <b>Colori</b> per una settimana.':': fai solo la prima metà di ogni esercizio, poi riprendi.')+'</div>';
+ return'';}
+function weekChart(nw){nw=Math.max(4,Math.round(nw));const m0=monday(new Date()),W=340,H=178,x0=30,x1=330,y0=14,y1=136,pts=[];
+ for(let i=nw-1;i>=0;i--){const a=new Date(m0);a.setDate(a.getDate()-7*i);const b=new Date(a);b.setDate(b.getDate()+7);
+  pts.push({lab:a.getDate()+'/'+(a.getMonth()+1),st:stats(trs(a.getTime(),b.getTime()))});}
+ const bw=(x1-x0)/nw,Y=v=>y1-(Math.min(100,v)/100)*(y1-y0);
+ let g='';for(const v of[0,50,100])g+='<line x1="'+x0+'" x2="'+x1+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#26332e" stroke-width="1"/><text x="'+(x0-6)+'" y="'+(Y(v)+4)+'" font-size="10" fill="#9db0a8" text-anchor="end">'+v+'</text>';
+ let bars='',line='',dots='',labs='';
+ pts.forEach((p,i)=>{const cx=x0+bw*i+bw/2;
+  if(i%Math.ceil(nw/8)===0||i===nw-1)labs+='<text x="'+cx+'" y="'+(y1+16)+'" font-size="10" fill="#9db0a8" text-anchor="middle">'+(i===nw-1?'ora':p.lab)+'</text>';
+  if(!p.st)return;const bh=y1-Y(p.st.er);
+  bars+='<rect x="'+(cx-bw*.28)+'" y="'+Y(p.st.er)+'" width="'+(bw*.56)+'" height="'+bh+'" rx="3" fill="#ff8a5c" opacity=".55"/>';
+  line+=(line?'L':'M')+cx.toFixed(1)+' '+Y(p.st.ok).toFixed(1);
+  dots+='<circle cx="'+cx+'" cy="'+Y(p.st.ok)+'" r="3.6" fill="#2fd49f" stroke="#182521" stroke-width="1.5"/>';});
+ return'<div class="chart"><h4>Andamento settimanale</h4><p>Più alta la linea, più bassa la barra: stai migliorando</p>'+
+  '<svg viewBox="0 0 '+W+' '+H+'">'+g+bars+'<path d="'+line+'" fill="none" stroke="#2fd49f" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>'+dots+labs+'</svg>'+
+  '<div class="leg"><span style="--c:#2fd49f">% conteggi esatti</span><span style="--c:#ff8a5c">errore medio %</span></div></div>';}
+function exChart(span){const now=Date.now(),D=864e5,ids=Object.keys(EXN),rowH=34,W=340,H=ids.length*rowH+6,x0=96,x1=300;
+ let g='',any=false;
+ ids.forEach((id,i)=>{const f=r=>r.id===id;const a=stats(trs(now-span*D,now+1).filter(f)),b=PER?stats(trs(now-2*span*D,now-span*D).filter(f)):null;
+  const y=6+i*rowH;g+='<text x="0" y="'+(y+15)+'" font-size="12" fill="#eaf2ee">'+EXN[id]+'</text>';
+  g+='<rect x="'+x0+'" y="'+(y+4)+'" width="'+(x1-x0)+'" height="9" rx="4.5" fill="#26332e"/>';
+  if(b)g+='<rect x="'+x0+'" y="'+(y+17)+'" width="'+Math.max(3,(x1-x0)*b.ok/100)+'" height="5" rx="2.5" fill="#5e6f69"/>';
+  if(a){any=true;g+='<rect x="'+x0+'" y="'+(y+4)+'" width="'+Math.max(4,(x1-x0)*a.ok/100)+'" height="9" rx="4.5" fill="#f5c542"/>'+
+   '<text x="'+(W-2)+'" y="'+(y+14)+'" font-size="12" fill="#eaf2ee" text-anchor="end" font-weight="600">'+Math.round(a.ok)+'%</text>';}
+  else g+='<text x="'+(W-2)+'" y="'+(y+14)+'" font-size="12" fill="#5e6f69" text-anchor="end">—</text>';});
+ if(!any)return'';
+ return'<div class="chart"><h4>Per esercizio</h4><p>% conteggi esatti'+(PER?' · barra sottile = periodo precedente':'')+'</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg></div>';}
+function heat(){const m0=monday(new Date()),nw=8,cs=34,gap=5,W=340,x0=W-(7*cs+6*gap),H=nw*(22)+18;
+ const col={casa:'#2fd49f',campo:'#ff8a5c',schermo:'#f5c542'};let g='';
+ ['L','M','M','G','V','S','D'].forEach((l,j)=>g+='<text x="'+(x0+j*(cs+gap)+cs/2)+'" y="10" font-size="10" fill="#9db0a8" text-anchor="middle">'+l+'</text>');
+ for(let w=0;w<nw;w++){const a=new Date(m0);a.setDate(a.getDate()-7*(nw-1-w));const y=16+w*22;
+  g+='<text x="0" y="'+(y+12)+'" font-size="10" fill="#9db0a8">'+a.getDate()+'/'+(a.getMonth()+1)+'</text>';
+  for(let j=0;j<7;j++){const d=new Date(a);d.setDate(a.getDate()+j);const v=L[key(d)]||[],fut=d>new Date();
+   const c=v.length?col[v[v.length-1]]||'#2fd49f':'#26332e';
+   g+='<rect x="'+(x0+j*(cs+gap))+'" y="'+y+'" width="'+cs+'" height="17" rx="5" fill="'+c+'" opacity="'+(fut?.25:v.length>1?1:v.length?.8:1)+'"'+(v.length>1?' stroke="#fff" stroke-width="1.2"':'')+'/>';}}
+ return'<div class="chart"><h4>Costanza · ultime 8 settimane</h4><p>Bordo bianco = più routine nello stesso giorno</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg>'+
+  '<div class="leg"><span style="--c:#2fd49f">casa</span><span style="--c:#ff8a5c">pre-match</span><span style="--c:#f5c542">schermo</span></div></div>';}
+function keyOf(r){return r.k;}
+function quit(){pause();home();}
+function home(){pause();$('progv').classList.add('hidden');$('player').classList.add('hidden');$('done').classList.add('hidden');$('home').classList.remove('hidden');paintHome();window.scrollTo(0,0);}
+
+function beepInit(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(ac&&ac.state==='suspended')ac.resume();}
+function signal(){if(!P.snd)return;
+ try{if(ac){const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);
+  o.frequency.value=880;g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(.25,ac.currentTime+.02);
+  g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.45);o.start();o.stop(ac.currentTime+.5);}}catch(e){}
+ if(navigator.vibrate)navigator.vibrate([90,60,90]);}
+async function reqWake(){if(!P.wake||!('wakeLock' in navigator)||wl)return;try{wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>wl=null);}catch(e){}}
+function relWake(){if(wl){try{wl.release();}catch(e){}wl=null;}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&run)reqWake();});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+
+/* ===== motore schermo intero ===== */
+let F=null;
+const COLS={rosso:'#e5243b',blu:'#1f5bd8',nero:'#111111',bianco:'#ffffff'};
+function tgLabel(t){return t.mode==='col'?'il <b style="color:'+COLS[t.target]+'">● '+t.target.toUpperCase()+'</b>':'il numero <b style="color:#e4ff5a">'+t.target+'</b>';}
+function newInner(){const t=F.tg;if(!t)return;const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
+ if(t.slots.has(t.i++))v=t.target;else{do{v=pool[Math.floor(Math.random()*pool.length)];}while(v===t.target||v===t.val);}
+ t.val=v;if(v===t.target)t.count++;const i=$('in');
+ if(t.mode==='col'){i.className='';i.textContent='';i.style.background=COLS[v];}else{i.className='num';i.textContent=v;}}
+/* quanti cambi avverranno nell'esercizio, poi scelgo a caso quante volte (0-10) e dove compare il bersaglio */
+function nChanges(s){let n=0;for(const ph of s.fs){const D=ph.d*1000;
+ if(ph.k==='jump'||ph.k==='rand'){let t=0;while(t<D){n++;t+=ph.from+(ph.to-ph.from)*Math.min(1,t/D);}}else n+=Math.ceil(D/1300);}return n;}
+function planSlots(s){const C=nChanges(s),max=Math.min(10,Math.floor((C-2)/2));
+ const N=Math.floor(Math.random()*(max+1)),set=new Set();let guard=0;
+ while(set.size<N&&guard++<500){const k=1+Math.floor(Math.random()*(C-1));if(!set.has(k)&&!set.has(k-1)&&!set.has(k+1))set.add(k);}
+ return set;}
+const GRID=[];for(const x of[-1,0,1])for(const y of[-1,0,1])if(x||y)GRID.push([x,y]);
+function beep(f,d,v){if(!P.snd||!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);
+ o.frequency.value=f;g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(v,ac.currentTime+.02);
+ g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d+.05);}catch(e){}}
+function openFS(s){const el=$('fs');el.classList.add('on');beepInit();reqWake();
+ try{const rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf)rf.call(el);}catch(e){}
+ F={s,ph:0,el:0,last:null,paused:false,ji:-1,next:0,nextIn:0,pos:[0,0],raf:0,cdT:null,run:false,tg:null};
+ const tm=P.target||'col';
+ if(tm!=='off'){const c=Object.keys(COLS);F.tg={mode:tm,target:tm==='col'?c[Math.floor(Math.random()*c.length)]:1+Math.floor(Math.random()*9),count:0,val:null,i:0,slots:planSlots(s)};}
+ const ii=$('in');ii.style.display=F.tg?'flex':'none';ii.textContent='';ii.className='';
+ $('dot').style.display='none';$('fs-lab').textContent=s.t;$('fs-t').textContent='';
+ let n=3;const show=()=>{const port=innerHeight>innerWidth;
+  $('fs-cd').style.display='flex';
+  $('fs-cd').innerHTML='<h3>'+s.t+'</h3><b>'+n+'</b>'+(F.tg?'<small style="font-size:18px;color:#ccc">Conta quante volte compare '+tgLabel(F.tg)+'</small>':'')+'<small>Testa ferma · segui il punto solo con gli occhi</small>'+
+   (port?'<small>Consiglio: ruota in orizzontale per più ampiezza</small>':'');beep(660,.12,.12);};
+ show();F.cdT=setInterval(()=>{n--;if(n<=0){clearInterval(F.cdT);F.cdT=null;$('fs-cd').style.display='none';
+   $('dot').style.display='block';$('dot').classList.add('flex');F.run=true;beep(990,.18,.18);F.raf=requestAnimationFrame(frame);}else show();},1000);}
+function frame(ts){if(!F)return;
+ if(F.last==null)F.last=ts;const dt=Math.min(100,ts-F.last);F.last=ts;if(!F.paused)F.el+=dt;
+ const phs=F.s.fs;let ph=phs[F.ph];
+ if(F.el>=ph.d*1000){F.ph++;F.el=0;F.next=0;F.ji=-1;if(F.ph>=phs.length){endFS();return;}ph=phs[F.ph];F.nextIn=0;beep(740,.1,.1);}
+ const W=innerWidth,H=innerHeight,m=Math.min(W,H)*.09,top=54,ax=W/2-m,ay=(H-top)/2-m,cx=W/2,cy=top+(H-top)/2;
+ const sz=Math.max(F.tg?30:20,Math.round(Math.min(W,H)*(F.tg?.068:.045)));const d=$('dot');d.style.width=d.style.height=sz+'px';
+ if(F.tg){const ii=$('in');if(F.tg.mode==='col'){ii.style.width=ii.style.height=Math.round(sz*.46)+'px';}else{ii.style.width=ii.style.height='auto';ii.style.fontSize=Math.round(sz*.62)+'px';}}
+ let x,y;
+ if(ph.k==='jump'||ph.k==='rand'){
+  if(F.el>=F.next){
+   newInner();
+   if(ph.k==='jump'){F.ji=(F.ji+1)%ph.pts.length;F.pos=ph.pts[F.ji];}
+   else{let p;do{p=GRID[Math.floor(Math.random()*GRID.length)];}while(p[0]===F.pos[0]&&p[1]===F.pos[1]);F.pos=p;}
+   const f=Math.min(1,F.el/(ph.d*1000));F.next=F.el+ph.from+(ph.to-ph.from)*f;}
+  [x,y]=F.pos;
+ }else{if(F.tg&&F.el>=F.nextIn){newInner();F.nextIn=F.el+1300;}const t=F.el/ph.per*2*Math.PI;
+  if(ph.k==='h'){x=Math.sin(t);y=0;}else if(ph.k==='v'){x=0;y=Math.sin(t);}else{x=Math.sin(t);y=Math.sin(2*t)*.9;}}
+ d.style.transform='translate('+(cx+x*ax-sz/2)+'px,'+(cy+y*ay-sz/2)+'px)';
+ let rem=(ph.d*1000-F.el);for(let i=F.ph+1;i<phs.length;i++)rem+=phs[i].d*1000;
+ $('fs-lab').textContent=F.paused?'❚❚ pausa · tocca per riprendere':ph.l;
+ $('fs-t').textContent=Math.ceil(rem/1000)+' s';
+ F.raf=requestAnimationFrame(frame);}
+$('fs').addEventListener('click',e=>{if(!F||!F.run||e.target.closest('.x'))return;F.paused=!F.paused;F.last=null;});
+function adj(n,e){e.stopPropagation();F.ans=Math.max(0,(F.ans||0)+n);$('ans').textContent=F.ans;}
+function confirmAns(e){e.stopPropagation();const real=F.tg.count,ans=F.ans||0;res[idx]={id:F.s.id,m:F.tg.mode,real,ans};
+ const ok=ans===real;beep(ok?1040:420,.25,.18);
+ $('fs-cd').innerHTML='<div class="res">'+(ok?'✔ Esatto: '+real:'Erano <b style="font-size:40px">'+real+'</b><br><small>hai contato '+ans+'</small>')+'</div>';
+ setTimeout(()=>{closeFS();left=0;done();},1600);}
+function closeFS(){$('dot').classList.remove('flex');if(F){cancelAnimationFrame(F.raf);if(F.cdT)clearInterval(F.cdT);}F=null;
+ $('fs').classList.remove('on');$('dot').style.display='none';$('fs-cd').style.display='none';
+ try{if(document.fullscreenElement)document.exitFullscreen();else if(document.webkitFullscreenElement)document.webkitExitFullscreen();}catch(e){}
+ relWake();}
+function endFS(){if(F.tg){cancelAnimationFrame(F.raf);F.run=false;F.ans=0;$('dot').style.display='none';$('dot').classList.remove('flex');
+  $('fs-lab').textContent=F.s.t;$('fs-t').textContent='';$('fs-cd').style.display='flex';
+  $('fs-cd').innerHTML='<h3>Quante volte è comparso '+tgLabel(F.tg)+'?</h3><div class="cnt"><button onclick="adj(-1,event)">−</button><b id="ans">0</b><button onclick="adj(1,event)">+</button></div><button class="okb" onclick="confirmAns(event)">Conferma</button>';
+  beep(880,.2,.16);return;}
+ closeFS();left=0;done();}
+function exitFS(e){e.stopPropagation();closeFS();left=cur.steps[idx].d;paintStep();}
+paintHome();
+</script>
+</body>
+</html>
