@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="1.2">
+<meta name="app-version" content="1.3">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -382,8 +382,8 @@ const R={
  casa:{k:'casa',name:'A casa',acc:'teal',days:[1,3,5],steps:[
   FS.H,FS.V,FS.D,FS.S,
   {t:'Fuoco vicino / lontano',s:'60 sec',d:60,i:'fuoco',x:'Fissa il dito vicino al naso per <b>2 secondi</b>, poi un punto lontano per <b>2 secondi</b>. Alterna senza pause.'},
-  {t:'Tracciamento al muro · DX',s:'mano destra · 60 sec',d:60,i:'muro',x:'Lancia la pallina al muro, un rimbalzo, presa con la <b>destra</b>. Occhi incollati sul palmo fino alla presa.'},
-  {t:'Tracciamento al muro · SX',s:'mano sinistra · 60 sec',d:60,i:'muro',x:'Stessa cosa con la <b>sinistra</b>. Se ti scappa, rallenta il lancio: conta la presa pulita, non la velocità.'},
+  {t:'Tracciamento al muro · DX',s:'mano destra · 60 sec',d:60,i:'muro',x:'Lancia la pallina al muro, un rimbalzo, presa con la <b>destra</b>. Segui la pallina quando parte dal muro, poi porta lo sguardo sulla <b>finestra di presa</b>: il punto poco davanti al palmo dove arriverà. Aspettala lì.'},
+  {t:'Tracciamento al muro · SX',s:'mano sinistra · 60 sec',d:60,i:'muro',x:'Stessa cosa con la <b>sinistra</b>. Segui la pallina quando parte dal muro, poi porta lo sguardo sulla <b>finestra di presa</b>: il punto poco davanti al palmo dove arriverà. Aspettala lì. Se ti scappa, rallenta il lancio: conta la presa pulita, non la velocità.'},
   {t:'Visione periferica',s:'90 sec',d:90,i:'peri',x:'Fissa un punto dritto sul muro. Lancia e afferra la pallina <b>di lato</b>, usando solo la coda dell\'occhio. Non spostare lo sguardo.'}
  ]},
  campo:{k:'campo',name:'Prima del match',acc:'coral',days:[2,4],steps:[
@@ -400,7 +400,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='1.2',VER_DATE='21/09/2026';
+const VER='1.3',VER_DATE='21/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
