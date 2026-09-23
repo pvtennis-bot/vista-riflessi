@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="1.5">
+<meta name="app-version" content="1.6">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -416,7 +416,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='1.5',VER_DATE='22/09/2026';
+const VER='1.6',VER_DATE='23/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -717,8 +717,10 @@ document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 /* ===== motore schermo intero ===== */
 let F=null;
 const COLS={rosso:'#e5243b',blu:'#1f5bd8',nero:'#111111',bianco:'#ffffff'};
-function tgLabel(t){if(t.mode==='sum')return'la <b style="color:#e4ff5a">somma</b> dei numeri';return t.mode==='col'?'il <b style="color:'+COLS[t.target]+'">● '+t.target.toUpperCase()+'</b>':'il numero <b style="color:#e4ff5a">'+t.target+'</b>';}
+function tgLabel(t){if(t.mode==='sum')return'la <b style="color:#e4ff5a">somma</b> dei numeri';if(t.mode==='col')return'il <b style="color:#fff"><span style="display:inline-block;width:.78em;height:.78em;border-radius:50%;vertical-align:-1px;background:'+COLS[t.target]+';box-shadow:0 0 0 2px rgba(255,255,255,.75)"></span> '+t.target.toUpperCase()+'</b>';return'il numero <b style="color:#e4ff5a">'+t.target+'</b>';}
 function newInner(){const t=F.tg;if(!t)return;
+ /* niente nuovo bersaglio negli ultimi 0,7 s: l'ultimo colore non deve comparire allo scadere */
+ const lp=F.s.fs[F.ph];if(lp&&F.ph===F.s.fs.length-1&&lp.d*1000-F.el<700)return;
  if(t.mode==='sum'){const i=$('in');i.className='num';if(t.slots.has(t.i++)){const v=1+Math.floor(Math.random()*4);t.count+=v;t.val=v;i.textContent=v;}else{t.val=null;i.textContent='';}return;}const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
  if(t.slots.has(t.i++))v=t.target;else{do{v=pool[Math.floor(Math.random()*pool.length)];}while(v===t.target||v===t.val);}
  t.val=v;if(v===t.target)t.count++;const i=$('in');
