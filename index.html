@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="1.8">
+<meta name="app-version" content="1.9">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -188,6 +188,9 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 #warn p{margin:0 0 10px;font-size:14px;line-height:1.5;color:var(--tx)}
 #warn p.s{color:var(--tx2)}
 #warn .fill{background:#f5c542;color:#1a1405;margin-top:6px}
+.dang{width:100%;border:1px solid #6b2b2b;border-radius:14px;padding:14px;background:none;color:#ff8f8f;font-size:15px;margin-top:8px;cursor:pointer}
+#wipe .fill{background:#d9453f;color:#fff}
+#wipe .inp{text-align:center;font:16px/1.4 system-ui;letter-spacing:2px}
 .wlink{display:block;margin:22px auto 0;background:none;border:0;color:#f5c542;font-size:14px;cursor:pointer;padding:6px 10px}
 .gc{background:#4285F4;color:#04101f}
 </style>
@@ -257,6 +260,13 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     <button class="fill" onclick="restoreText($('pastebox').value)">Ripristina</button></div>
   </div>
   <p class="note" id="bk-info"></p>
+  <button class="dang" onclick="wipeOpen()">🗑️ Azzera storico</button>
+  <div id="wipe" class="hidden" style="margin-top:8px">
+    <p class="note" id="wipe-txt"></p>
+    <input class="inp" id="wipebox" placeholder="AZZERA" autocapitalize="characters">
+    <div class="row2" style="margin-top:8px"><button class="ghost" style="margin:0" onclick="wipeClose()">Annulla</button>
+    <button class="fill" onclick="wipeDo()">Azzera tutto</button></div>
+  </div>
 
   <div class="sec">Chi esegue la routine</div>
   <input class="inp" id="uname" placeholder="Nome e cognome" oninput="setName(this.value)">
@@ -416,7 +426,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='1.8',VER_DATE='24/09/2026';
+const VER='1.9',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -592,6 +602,15 @@ function paintBk(){const n=SS.length;let t=n+' sessioni salvate su questo dispos
  if(P.bk){const g=Math.floor((Date.now()-P.bk)/864e5);t+=' Ultimo backup: '+(g===0?'oggi':g===1?'ieri':g+' giorni fa')+'.';
   if(g>=7)t+=' ⚠︎ Consigliato farne uno nuovo.';}else if(n)t+=' ⚠︎ Nessun backup ancora.';
  $('bk-info').textContent=t;}
+function wipeOpen(){const n=SS.length,g=P.bk?Math.floor((Date.now()-P.bk)/864e5):null;
+ $('wipe-txt').innerHTML='Cancella le <b>'+n+' sessioni</b> di questo dispositivo, i progressi e il calendario della costanza. Impostazioni, nome e avvertenze restano. <b>Non si può annullare.</b>'+
+  (n?(g===null?'<br>⚠︎ Non hai ancora fatto un backup: fallo prima, se vuoi conservare questi dati.':g>=1?'<br>⚠︎ Ultimo backup '+g+' giorni fa.':''):'')+
+  '<br>Scrivi <b>AZZERA</b> per confermare.';
+ $('wipe').classList.remove('hidden');$('wipebox').value='';$('wipebox').focus();}
+function wipeClose(){$('wipe').classList.add('hidden');$('wipebox').value='';}
+function wipeDo(){if($('wipebox').value.trim().toUpperCase()!=='AZZERA'){alert('Scrivi AZZERA per confermare.');return;}
+ SS.length=0;for(const k in L)delete L[k];delete P.bk;lastSess=null;save();wipeClose();paintHome();
+ alert('Storico azzerato. Puoi ripartire da zero.');}
 function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
 function restoreFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
  r.onload=()=>restoreText(String(r.result));r.readAsText(f);inp.value='';}
