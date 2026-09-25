@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.2">
+<meta name="app-version" content="2.3">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -427,7 +427,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.2',VER_DATE='25/09/2026';
+const VER='2.3',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -740,11 +740,14 @@ let F=null;
 const COLS={rosso:'#e5243b',blu:'#1f5bd8',nero:'#111111',bianco:'#ffffff'};
 function tgLabel(t){if(t.mode==='sum')return'la <b style="color:#e4ff5a">somma</b> dei numeri';if(t.mode==='col')return'il <b style="color:#fff"><span style="display:inline-block;width:.78em;height:.78em;border-radius:50%;vertical-align:-1px;background:'+COLS[t.target]+';box-shadow:0 0 0 2px rgba(255,255,255,.75)"></span> '+t.target.toUpperCase()+'</b>';return'il numero <b style="color:#e4ff5a">'+t.target+'</b>';}
 function newInner(){const t=F.tg;if(!t)return;
- /* niente nuovo bersaglio negli ultimi 1,5 s dell'esercizio: l'ultimo colore deve restare visibile fino allo scadere */
- if(remMs()<1500)return;
- if(t.mode==='sum'){const i=$('in');i.className='num';if(t.slots.has(t.i++)){const v=1+Math.floor(Math.random()*4);t.count+=v;t.val=v;i.textContent=v;}else{t.val=null;i.textContent='';}return;}const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
- if(t.slots.has(t.i++))v=t.target;else{do{v=pool[Math.floor(Math.random()*pool.length)];}while(v===t.target||v===t.val);}
- t.val=v;if(v===t.target)t.count++;const i=$('in');
+ /* negli ultimi 1,5 s il punto continua a cambiare, ma il bersaglio non compare più:
+    così l'ultima comparsa non resta ferma sotto più salti e non la si conta due volte */
+ const late=remMs()<1500;
+ if(t.mode==='sum'){const i=$('in');i.className='num';
+  if(t.slots.has(t.i++)&&!late){const v=1+Math.floor(Math.random()*4);t.count+=v;t.val=v;i.textContent=v;}
+  else{t.val=null;i.textContent='';}return;}const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
+ if(t.slots.has(t.i++)&&!late)v=t.target;else{do{v=pool[Math.floor(Math.random()*pool.length)];}while(v===t.target||v===t.val);}
+ t.val=v;if(v===t.target){t.count++;(t.at=t.at||[]).push(Math.round(F.el/1000));}const i=$('in');
  if(t.mode==='col'){i.className='';i.textContent='';i.style.background=COLS[v];}else{i.className='num';i.textContent=v;}}
 /* quanti cambi avverranno nell'esercizio, poi scelgo a caso quante volte (0-10) e dove compare il bersaglio */
 function remMs(){const phs=F.s.fs;let r=phs[F.ph].d*1000-F.el;for(let i=F.ph+1;i<phs.length;i++)r+=phs[i].d*1000;return r;}
@@ -802,8 +805,9 @@ $('fs').addEventListener('click',e=>{if(!F||!F.run||e.target.closest('.x'))retur
 function adj(n,e){e.stopPropagation();F.ans=Math.max(0,(F.ans||0)+n);$('ans').textContent=F.ans;}
 function confirmAns(e){e.stopPropagation();const real=F.tg.count,ans=F.ans||0;res[idx]={id:F.s.id,m:F.tg.mode,real,ans};
  const ok=ans===real;beep(ok?1040:420,.25,.18);
- $('fs-cd').innerHTML='<div class="res">'+(ok?'✔ Esatto: '+real:'Erano <b style="font-size:40px">'+real+'</b><br><small>hai contato '+ans+'</small>')+'</div>';
- setTimeout(()=>{closeFS();left=0;done();},1600);}
+ const at=(F.tg.at||[]).length?'<br><small style="font-size:15px;color:#9aa">comparso al secondo '+F.tg.at.join(', ')+'</small>':'';
+ $('fs-cd').innerHTML='<div class="res">'+(ok?'✔ Esatto: '+real:'Erano <b style="font-size:40px">'+real+'</b><br><small>hai contato '+ans+'</small>')+at+'</div>';
+ setTimeout(()=>{closeFS();left=0;done();},2600);}
 const CUES=[{c:'#2fd49f',w:'DESTRA',f:880},{c:'#4f8df5',w:'SINISTRA',f:660},{c:'#e5243b',w:'FERMO',f:330}];
 function cueFrame(ph){const cu=$('cue'),fs=$('fs');$('dot').classList.remove('flex');$('dot').style.display='none';
  if(F.el>=ph.d*1000){fs.style.background='#000';cu.style.display='none';endFS();return;}
