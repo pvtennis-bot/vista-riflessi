@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="1.9">
+<meta name="app-version" content="2.0">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -426,7 +426,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='1.9',VER_DATE='25/09/2026';
+const VER='2.0',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -756,6 +756,9 @@ const GRID=[];for(const x of[-1,0,1])for(const y of[-1,0,1])if(x||y)GRID.push([x
 function beep(f,d,v){if(!P.snd||!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);
  o.frequency.value=f;g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(v,ac.currentTime+.02);
  g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d+.05);}catch(e){}}
+/* il punto ha più spazio nel verso dello schermo: consiglio solo se la rotazione è quella sbagliata */
+function rotHint(s,port){if(s.id==='H'&&port)return'<small>Ruota in orizzontale: il punto si allarga</small>';
+ if(s.id==='V'&&!port)return'<small>Tieni lo schermo in verticale: il punto sale di più</small>';return'';}
 function openFS(s){const el=$('fs');el.classList.add('on');beepInit();reqWake();
  try{const rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf)rf.call(el);}catch(e){}
  F={s,ph:0,el:0,last:null,paused:false,ji:-1,next:0,nextIn:0,pos:[0,0],raf:0,cdT:null,run:false,tg:null};
@@ -766,8 +769,7 @@ function openFS(s){const el=$('fs');el.classList.add('on');beepInit();reqWake();
  $('dot').style.display='none';$('fs-lab').textContent=s.t;$('fs-t').textContent='';
  let n=3;const show=()=>{const port=innerHeight>innerWidth;
   $('fs-cd').style.display='flex';
-  $('fs-cd').innerHTML='<h3>'+s.t+'</h3><b>'+n+'</b>'+(F.tg?'<small style="font-size:18px;color:#ccc">'+(F.tg.mode==='sum'?'Numeri da 1 a 4, ogni tanto: calcola '+tgLabel(F.tg)+(F.tg.mp?'<br><span class="mp">MATCH POINT · un solo tentativo</span>':''):'Conta quante volte compare '+tgLabel(F.tg))+'</small>':'')+(s.id==='B'?'<small>Segui il cerchio con il respiro</small>':'<small>Testa ferma · segui il punto solo con gli occhi</small>'+
-   (port?'<small>Consiglio: ruota in orizzontale per più ampiezza</small>':''));beep(660,.12,.12);};
+  $('fs-cd').innerHTML='<h3>'+s.t+'</h3><b>'+n+'</b>'+(F.tg?'<small style="font-size:18px;color:#ccc">'+(F.tg.mode==='sum'?'Numeri da 1 a 4, ogni tanto: calcola '+tgLabel(F.tg)+(F.tg.mp?'<br><span class="mp">MATCH POINT · un solo tentativo</span>':''):'Conta quante volte compare '+tgLabel(F.tg))+'</small>':'')+(s.id==='B'?'<small>Segui il cerchio con il respiro</small>':'<small>Testa ferma · segui il punto solo con gli occhi</small>'+rotHint(s,port));beep(660,.12,.12);};
  show();F.cdT=setInterval(()=>{n--;if(n<=0){clearInterval(F.cdT);F.cdT=null;$('fs-cd').style.display='none';
    if(!['cue','breath'].includes(s.fs[0].k)){$('dot').style.display='block';$('dot').classList.add('flex');}F.run=true;beep(990,.18,.18);F.raf=requestAnimationFrame(frame);}else show();},1000);}
 function frame(ts){if(!F)return;
