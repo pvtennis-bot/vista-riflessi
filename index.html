@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.0">
+<meta name="app-version" content="2.1">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -383,6 +383,7 @@ const ICONS={
  resp:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="70" cy="35" r="12" fill="currentColor" opacity=".35"/><circle cx="70" cy="35" r="22" stroke-dasharray="4 4"/><circle cx="70" cy="35" r="31" opacity=".45"/><path d="M14 35h18M26 30l6 5-6 5M126 35h-18M114 30l-6 5 6 5"/></g></svg>',
  scritte:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="52" cy="35" r="24"/><path d="M28 35h48"/><text x="52" y="30" font-size="16" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">A7</text><path stroke-dasharray="4 4" d="M84 22h18M84 35h22M84 48h18"/></g></svg>'
 };
+const ROT={H:'<b>Schermo in orizzontale.</b> ',V:'<b>Schermo in verticale, non ruotato.</b> '};
 const FSX='iPad a <b>40–50 cm</b>, luce ambiente normale. <b>Testa ferma</b>: segui il punto solo con gli occhi. Tocca lo schermo per mettere in pausa.';
 const FS={
  H:{t:'Saccadi orizzontali',s:'schermo · 30 sec',d:30,i:'sacc',fs:[{k:'jump',l:'◀ ▶',pts:[[-1,0],[1,0]],from:1000,to:520,d:30}]},
@@ -398,7 +399,7 @@ const FS={
  S:{t:'Inseguimento lento',s:'schermo · 30 sec',d:30,i:'purs',fs:[
    {k:'h',l:'orizzontale',per:4000,d:10},{k:'v',l:'verticale',per:4000,d:10},{k:'8',l:'otto',per:6000,d:10}]}
 };
-for(const k in FS){if(!FS[k].x)FS[k].x=FSX;FS[k].id=k;}
+for(const k in FS){if(!FS[k].x)FS[k].x=(ROT[k]||'')+FSX;FS[k].id=k;}
 /* respiro: Base 60 s (6 cicli da 10 s), Profondo 56 s (4 cicli da 14 s): finisce sempre dopo un ciclo completo */
 const brD=()=>(P.breath==='prof'?56:60);
 Object.defineProperty(FS.B,'d',{get:brD});Object.defineProperty(FS.B.fs[0],'d',{get:brD});
@@ -426,7 +427,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.0',VER_DATE='25/09/2026';
+const VER='2.1',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
