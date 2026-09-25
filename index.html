@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.1">
+<meta name="app-version" content="2.2">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -427,7 +427,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.1',VER_DATE='25/09/2026';
+const VER='2.2',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -494,6 +494,7 @@ function paintStep(){
 }
 function fmt(n){return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
 function paintTime(){
+ if(!cur)return; /* Progressi aperti senza una routine in corso */
  const s=cur.steps[idx];$('p-time').textContent=fmt(Math.max(0,left));
  $('p-state').textContent=run?(s.bp?att+' segnali':'in corso'):(left===s.d?(s.bp?'parte al primo beep':'pronto'):'in pausa');
  $('prog').style.strokeDashoffset=653.5*(1-left/s.d);
