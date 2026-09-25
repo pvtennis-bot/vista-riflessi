@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.3">
+<meta name="app-version" content="2.4">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -253,7 +253,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     <button class="ghost" style="margin:0" onclick="expAll()">💬 WhatsApp</button>
     <button class="ghost" style="margin:0" onclick="pasteOpen()">📋 Incolla codice</button>
   </div>
-  <input type="file" id="fin" accept=".json,.txt,application/json,text/plain" class="hidden" onchange="restoreFile(this)">
+  <input type="file" id="fin" class="hidden" onchange="restoreFile(this)">
   <div id="paste" class="hidden" style="margin-top:8px">
     <textarea class="inp" id="pastebox" placeholder="Incolla qui il messaggio WhatsApp (o il codice VR1:…)"></textarea>
     <div class="row2" style="margin-top:0"><button class="ghost" style="margin:0" onclick="$('paste').classList.add('hidden')">Annulla</button>
@@ -427,7 +427,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.3',VER_DATE='25/09/2026';
+const VER='2.4',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -615,10 +615,11 @@ function wipeDo(){if($('wipebox').value.trim().toUpperCase()!=='AZZERA'){alert('
  alert('Storico azzerato. Puoi ripartire da zero.');}
 function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
 function restoreFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
+ r.onerror=()=>alert('Non riesco a leggere il file. Riprova, oppure usa Incolla codice.');
  r.onload=()=>restoreText(String(r.result));r.readAsText(f);inp.value='';}
 function restoreText(t){let o=null;t=String(t||'').trim();
  try{const m=t.match(/VR1:([A-Za-z0-9+\/=]+)/);o=m?b64d(m[1]):JSON.parse(t);}catch(e){}
- if(!o||!Array.isArray(o.ss)){alert('Codice o file non riconosciuto.');return;}
+ if(!o||!Array.isArray(o.ss)){alert('File o codice non riconosciuto.\n\nSe arriva da WhatsApp, apri il messaggio, copia tutto il testo e usa "Incolla codice".');return;}
  const have=new Set(SS.map(s=>s.ms));let add=0;
  for(const c of o.ss){if(have.has(c.a))continue;const R0=R[c.k]||R.casa,st=new Date(c.a),en=new Date(c.b);
   SS.push({r:R0.name,rk:c.k,name:o.name||'',day:DAYS[en.getDay()],date:itDate(en),iso:key(en),start:hm(st),end:hm(en),
