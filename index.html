@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.8">
+<meta name="app-version" content="2.9">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -255,7 +255,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   </div>
   <input type="file" id="fin" class="hidden" onchange="restoreFile(this)">
   <div id="paste" class="hidden" style="margin-top:8px">
-    <textarea class="inp" id="pastebox" placeholder="Incolla qui il codice del backup (o il messaggio WhatsApp)"></textarea>
+    <textarea class="inp" id="pastebox" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" placeholder="Incolla qui il codice del backup (o il messaggio WhatsApp)"></textarea>
     <div class="row2" style="margin-top:0"><button class="ghost" style="margin:0" onclick="pasteClose()">Annulla</button>
     <button class="fill" onclick="restoreText($('pastebox').value)">Ripristina</button></div>
     <button class="ghost" onclick="$('fin').click()">📂 Oppure scegli un file</button>
@@ -430,7 +430,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.8',VER_DATE='26/09/2026';
+const VER='2.9',VER_DATE='26/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -628,6 +628,22 @@ function wipeDo(){if($('wipebox').value.trim().toUpperCase()!=='AZZERA'){alert('
  alert('Storico azzerato. Puoi ripartire da zero.');}
 function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
 function pasteClose(){$('paste').classList.add('hidden');$('pastebox').value='';}
+/* iOS: execCommand('copy') a volte riporta successo senza copiare niente.
+   Quindi dichiariamo "copiato" solo quando l'API appunti conferma; altrimenti
+   mostriamo il codice già selezionato e lo si copia a mano. */
+function copyCode(){const c=code();
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(c).then(()=>{markBackup();
+   alert('Codice copiato ('+c.length+' caratteri).\n\nIncollalo dove vuoi: una nota, una mail, un messaggio. Per rimetterlo in questa o in un\'altra app: Ripristina, poi incolla.');})
+  .catch(()=>manualCopy(c));
+ } else manualCopy(c);}
+function manualCopy(c){markBackup();$('paste').classList.remove('hidden');
+ const b=$('pastebox');b.value=c;b.focus();b.setSelectionRange(0,c.length);
+ $('paste').scrollIntoView({block:'center'});
+ alert('Il codice è qui sotto, già selezionato: tienilo premuto e scegli Copia.\n\nÈ lo stesso codice del backup ('+c.length+' caratteri).');}
+
+function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
+function pasteClose(){$('paste').classList.add('hidden');$('pastebox').value='';}
 function copyCode(){const c=code();
  const ok=()=>{markBackup();alert('Codice copiato.\n\nIncollalo dove vuoi: una nota, una mail, un messaggio. Per rimetterlo in questa o in un\'altra app: Ripristina, poi incolla.');};
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(c).then(ok).catch(()=>fallbackCopy(c,ok));}
@@ -640,8 +656,12 @@ function restoreFile(inp){const f=inp.files[0];if(!f)return;const r=new FileRead
  r.onerror=()=>alert('Non riesco a leggere il file. Riprova, oppure usa Incolla codice.');
  r.onload=()=>restoreText(String(r.result));r.readAsText(f);inp.value='';}
 function restoreText(t){let o=null;t=String(t||'').trim();
- try{const m=t.match(/VR1:([A-Za-z0-9+\/=]+)/);o=m?b64d(m[1]):JSON.parse(t);}catch(e){}
- if(!o||!Array.isArray(o.ss)){alert('File o codice non riconosciuto.\n\nSe arriva da WhatsApp, apri il messaggio, copia tutto il testo e usa "Incolla codice".');return;}
+ /* il prefisso puo' arrivare minuscolo (iOS lo corregge) e il codice puo' essere
+    spezzato su piu' righe da chi lo incolla: normalizziamo prima di decodificare */
+ try{const m=t.match(/vr1\s*:\s*([A-Za-z0-9+\/=\s]+)/i);
+  o=m?b64d(m[1].replace(/\s+/g,'')):JSON.parse(t);}catch(e){}
+ if(!o||!Array.isArray(o.ss)){const p=t.slice(0,28).replace(/\s+/g,' ');
+  alert('File o codice non riconosciuto.\n\nHo ricevuto '+t.length+' caratteri che iniziano con:\n'+(p||'(niente)')+'\n\nDeve iniziare con VR1: oppure con una parentesi graffa. Se arriva da WhatsApp, copia tutto il messaggio.');return;}
  const have=new Set(SS.map(s=>s.ms));let add=0;
  for(const c of o.ss){if(have.has(c.a))continue;const R0=R[c.k]||R.casa,st=new Date(c.a),en=new Date(c.b);
   SS.push({r:R0.name,rk:c.k,name:o.name||'',day:DAYS[en.getDay()],date:itDate(en),iso:key(en),start:hm(st),end:hm(en),
