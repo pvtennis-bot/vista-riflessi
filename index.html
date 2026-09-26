@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.4">
+<meta name="app-version" content="2.5">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -427,7 +427,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.4',VER_DATE='25/09/2026';
+const VER='2.5',VER_DATE='25/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -743,7 +743,9 @@ function tgLabel(t){if(t.mode==='sum')return'la <b style="color:#e4ff5a">somma</
 function newInner(){const t=F.tg;if(!t)return;
  /* negli ultimi 1,5 s il punto continua a cambiare, ma il bersaglio non compare più:
     così l'ultima comparsa non resta ferma sotto più salti e non la si conta due volte */
- const late=remMs()<1500;
+ /* il bersaglio non compare se resterebbe a schermo troppo poco per essere letto:
+    negli ultimi 1,5 s dell'esercizio e a cavallo del cambio di fase (es. cambio diagonale) */
+ const late=remMs()<1500||phRem()<450;
  if(t.mode==='sum'){const i=$('in');i.className='num';
   if(t.slots.has(t.i++)&&!late){const v=1+Math.floor(Math.random()*4);t.count+=v;t.val=v;i.textContent=v;}
   else{t.val=null;i.textContent='';}return;}const pool=t.mode==='col'?Object.keys(COLS):[1,2,3,4,5,6,7,8,9];let v;
@@ -751,6 +753,7 @@ function newInner(){const t=F.tg;if(!t)return;
  t.val=v;if(v===t.target){t.count++;(t.at=t.at||[]).push(Math.round(F.el/1000));}const i=$('in');
  if(t.mode==='col'){i.className='';i.textContent='';i.style.background=COLS[v];}else{i.className='num';i.textContent=v;}}
 /* quanti cambi avverranno nell'esercizio, poi scelgo a caso quante volte (0-10) e dove compare il bersaglio */
+function phRem(){return F.s.fs[F.ph].d*1000-F.el;}
 function remMs(){const phs=F.s.fs;let r=phs[F.ph].d*1000-F.el;for(let i=F.ph+1;i<phs.length;i++)r+=phs[i].d*1000;return r;}
 function nChanges(s){let n=0;for(const ph of s.fs){const D=ph.d*1000;
  if(ph.k==='jump'||ph.k==='rand'){let t=0;while(t<D){n++;t+=ph.from+(ph.to-ph.from)*Math.min(1,t/D);}}else n+=Math.ceil(D/1300);}return n;}
