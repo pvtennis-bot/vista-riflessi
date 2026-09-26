@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.7">
+<meta name="app-version" content="2.8">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -251,7 +251,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   </div>
   <div class="row2">
     <button class="ghost" style="margin:0" onclick="pasteOpen()">📂 Ripristina</button>
-    <button class="ghost" style="margin:0" onclick="expAll()">💬 WhatsApp</button>
+    <button class="ghost" style="margin:0" onclick="expAll()">📤 Condividi</button>
   </div>
   <input type="file" id="fin" class="hidden" onchange="restoreFile(this)">
   <div id="paste" class="hidden" style="margin-top:8px">
@@ -261,6 +261,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     <button class="ghost" onclick="$('fin').click()">📂 Oppure scegli un file</button>
     <p class="note" style="margin-top:6px">Android: se nel selettore non vedi il file, tocca la lente e scrivi <b>.json</b></p>
   </div>
+  <p class="note" style="margin-top:10px"><b>Copia codice</b> per passare i dati a un altro dispositivo. <b>Condividi</b> per mandare riepilogo e codice a WhatsApp, mail o Drive.</p>
   <p class="note" id="bk-info"></p>
   <button class="dang" onclick="wipeOpen()">🗑️ Azzera storico</button>
   <div id="wipe" class="hidden" style="margin-top:8px">
@@ -429,7 +430,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.7',VER_DATE='26/09/2026';
+const VER='2.8',VER_DATE='26/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
