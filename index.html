@@ -598,7 +598,7 @@ function code(){return 'VR1:'+b64e(packAll());}
 /* un messaggio WhatsApp regge circa 65.000 caratteri: oltre, verrebbe troncato
    e il codice risulterebbe inservibile al ripristino, senza avvisare nessuno */
 const WA_MAX=60000;
-function expAll(){const c=code(),head='— Codice backup (per ripristinare incollalo nell\'app) —\n';
+function expAll(){if(noData('condividere'))return;const c=code(),head='— Codice backup (per ripristinare incollalo nell\'app) —\n';
  let t=allText()+'\n\n'+head+c;
  if(t.length>WA_MAX){
   t='👁️ VISTA & RIFLESSI · STORICO\nSessioni: '+SS.length+'\n(elenco omesso: storico lungo)\n\n'+head+c;
@@ -607,7 +607,9 @@ function expAll(){const c=code(),head='— Codice backup (per ripristinare incol
    return;}
   alert('Storico lungo: mando solo il codice, senza l\'elenco delle sessioni.\n\nIl ripristino funziona lo stesso.');}
  if(navigator.share)navigator.share({text:t}).catch(()=>{});else waLink(t);markBackup();}
-async function backupFile(){const d=new Date(),fn='vista-riflessi-backup-'+key(d)+'.json';
+function noData(v){if(SS.length)return false;
+ alert('Non c\'è ancora niente da '+v+': 0 sessioni su questo dispositivo.\n\nCompleta una routine, oppure ripristina prima un backup.');return true;}
+async function backupFile(){if(noData('salvare'))return;const d=new Date(),fn='vista-riflessi-backup-'+key(d)+'.json';
  const txt=JSON.stringify(packAll());
  try{const f=new File([txt],fn,{type:'application/json'});
   if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Backup Vista & Riflessi'});markBackup();return;}}catch(e){if(e&&e.name==='AbortError')return;}
@@ -631,7 +633,7 @@ function pasteClose(){$('paste').classList.add('hidden');$('pastebox').value='';
 /* iOS: execCommand('copy') a volte riporta successo senza copiare niente.
    Quindi dichiariamo "copiato" solo quando l'API appunti conferma; altrimenti
    mostriamo il codice già selezionato e lo si copia a mano. */
-function copyCode(){const c=code();
+function copyCode(){if(noData('copiare'))return;const c=code();
  if(navigator.clipboard&&navigator.clipboard.writeText){
   navigator.clipboard.writeText(c).then(()=>{markBackup();
    alert('Codice copiato ('+c.length+' caratteri).\n\nIncollalo dove vuoi: una nota, una mail, un messaggio. Per rimetterlo in questa o in un\'altra app: Ripristina, poi incolla.');})
@@ -642,16 +644,6 @@ function manualCopy(c){markBackup();$('paste').classList.remove('hidden');
  $('paste').scrollIntoView({block:'center'});
  alert('Il codice è qui sotto, già selezionato: tienilo premuto e scegli Copia.\n\nÈ lo stesso codice del backup ('+c.length+' caratteri).');}
 
-function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
-function pasteClose(){$('paste').classList.add('hidden');$('pastebox').value='';}
-function copyCode(){const c=code();
- const ok=()=>{markBackup();alert('Codice copiato.\n\nIncollalo dove vuoi: una nota, una mail, un messaggio. Per rimetterlo in questa o in un\'altra app: Ripristina, poi incolla.');};
- if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(c).then(ok).catch(()=>fallbackCopy(c,ok));}
- else fallbackCopy(c,ok);}
-function fallbackCopy(c,ok){const t=document.createElement('textarea');t.value=c;t.style.position='fixed';t.style.opacity='0';
- document.body.appendChild(t);t.focus();t.select();let done=false;try{done=document.execCommand('copy');}catch(e){}
- t.remove();if(done)ok();else{$('paste').classList.remove('hidden');$('pastebox').value=c;$('pastebox').select();
-  alert('Non riesco a copiare da solo: il codice è qui sotto, selezionalo e copialo a mano.');}}
 function restoreFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
  r.onerror=()=>alert('Non riesco a leggere il file. Riprova, oppure usa Incolla codice.');
  r.onload=()=>restoreText(String(r.result));r.readAsText(f);inp.value='';}
