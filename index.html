@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="2.5">
+<meta name="app-version" content="2.7">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -247,17 +247,19 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   <div class="sec">Backup storico</div>
   <div class="row2">
     <button class="ghost" style="margin:0" onclick="backupFile()">💾 Salva backup</button>
-    <button class="ghost" style="margin:0" onclick="$('fin').click()">📂 Ripristina file</button>
+    <button class="ghost" style="margin:0" onclick="copyCode()">📋 Copia codice</button>
   </div>
   <div class="row2">
+    <button class="ghost" style="margin:0" onclick="pasteOpen()">📂 Ripristina</button>
     <button class="ghost" style="margin:0" onclick="expAll()">💬 WhatsApp</button>
-    <button class="ghost" style="margin:0" onclick="pasteOpen()">📋 Incolla codice</button>
   </div>
   <input type="file" id="fin" class="hidden" onchange="restoreFile(this)">
   <div id="paste" class="hidden" style="margin-top:8px">
-    <textarea class="inp" id="pastebox" placeholder="Incolla qui il messaggio WhatsApp (o il codice VR1:…)"></textarea>
-    <div class="row2" style="margin-top:0"><button class="ghost" style="margin:0" onclick="$('paste').classList.add('hidden')">Annulla</button>
+    <textarea class="inp" id="pastebox" placeholder="Incolla qui il codice del backup (o il messaggio WhatsApp)"></textarea>
+    <div class="row2" style="margin-top:0"><button class="ghost" style="margin:0" onclick="pasteClose()">Annulla</button>
     <button class="fill" onclick="restoreText($('pastebox').value)">Ripristina</button></div>
+    <button class="ghost" onclick="$('fin').click()">📂 Oppure scegli un file</button>
+    <p class="note" style="margin-top:6px">Android: se nel selettore non vedi il file, tocca la lente e scrivi <b>.json</b></p>
   </div>
   <p class="note" id="bk-info"></p>
   <button class="dang" onclick="wipeOpen()">🗑️ Azzera storico</button>
@@ -427,7 +429,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='2.5',VER_DATE='25/09/2026';
+const VER='2.7',VER_DATE='26/09/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -592,7 +594,17 @@ function packAll(){return{v:1,name:P.name||'',ss:SS.map(s=>({k:s.rk,a:s.ms,b:s.m
 function b64e(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
 function b64d(t){return JSON.parse(decodeURIComponent(escape(atob(t))));}
 function code(){return 'VR1:'+b64e(packAll());}
-function expAll(){const t=allText()+'\n\n— Codice backup (per ripristinare incollalo nell\'app) —\n'+code();
+/* un messaggio WhatsApp regge circa 65.000 caratteri: oltre, verrebbe troncato
+   e il codice risulterebbe inservibile al ripristino, senza avvisare nessuno */
+const WA_MAX=60000;
+function expAll(){const c=code(),head='— Codice backup (per ripristinare incollalo nell\'app) —\n';
+ let t=allText()+'\n\n'+head+c;
+ if(t.length>WA_MAX){
+  t='👁️ VISTA & RIFLESSI · STORICO\nSessioni: '+SS.length+'\n(elenco omesso: storico lungo)\n\n'+head+c;
+  if(t.length>WA_MAX){
+   alert('Lo storico è troppo lungo per un messaggio WhatsApp ('+Math.round(t.length/1000)+' mila caratteri su 65 mila).\n\nIl messaggio verrebbe tagliato e il codice non funzionerebbe.\n\nUsa Salva backup: il file non ha limiti.');
+   return;}
+  alert('Storico lungo: mando solo il codice, senza l\'elenco delle sessioni.\n\nIl ripristino funziona lo stesso.');}
  if(navigator.share)navigator.share({text:t}).catch(()=>{});else waLink(t);markBackup();}
 async function backupFile(){const d=new Date(),fn='vista-riflessi-backup-'+key(d)+'.json';
  const txt=JSON.stringify(packAll());
@@ -614,6 +626,15 @@ function wipeDo(){if($('wipebox').value.trim().toUpperCase()!=='AZZERA'){alert('
  SS.length=0;for(const k in L)delete L[k];delete P.bk;lastSess=null;save();wipeClose();paintHome();
  alert('Storico azzerato. Puoi ripartire da zero.');}
 function pasteOpen(){$('paste').classList.remove('hidden');$('pastebox').focus();}
+function pasteClose(){$('paste').classList.add('hidden');$('pastebox').value='';}
+function copyCode(){const c=code();
+ const ok=()=>{markBackup();alert('Codice copiato.\n\nIncollalo dove vuoi: una nota, una mail, un messaggio. Per rimetterlo in questa o in un\'altra app: Ripristina, poi incolla.');};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(c).then(ok).catch(()=>fallbackCopy(c,ok));}
+ else fallbackCopy(c,ok);}
+function fallbackCopy(c,ok){const t=document.createElement('textarea');t.value=c;t.style.position='fixed';t.style.opacity='0';
+ document.body.appendChild(t);t.focus();t.select();let done=false;try{done=document.execCommand('copy');}catch(e){}
+ t.remove();if(done)ok();else{$('paste').classList.remove('hidden');$('pastebox').value=c;$('pastebox').select();
+  alert('Non riesco a copiare da solo: il codice è qui sotto, selezionalo e copialo a mano.');}}
 function restoreFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
  r.onerror=()=>alert('Non riesco a leggere il file. Riprova, oppure usa Incolla codice.');
  r.onload=()=>restoreText(String(r.result));r.readAsText(f);inp.value='';}
