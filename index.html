@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.0">
+<meta name="app-version" content="3.1">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -430,7 +430,7 @@ const R={
  ]},
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
 };
-const VER='3.0',VER_DATE='26/09/2026';
+const VER='3.1',VER_DATE='01/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -443,7 +443,7 @@ function save(){localStorage.setItem('vr-pref',JSON.stringify(P));localStorage.s
 function setName(v){P.name=v.trim();save();}
 function hm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 function itDate(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
-function key(d){return d.toISOString().slice(0,10);}
+function key(d){const p=n=>(n<10?'0':'')+n;return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
 function tog(k){P[k]=P[k]?0:1;save();paintSw();if(k==='wake'&&!P.wake)relWake();}
 function cycTg(){P.target={off:'col',col:'num',num:'sum',sum:'off'}[P.target||'col'];save();paintSw();}
 function cycBr(){P.breath=(P.breath||'base')==='base'?'prof':'base';save();paintSw();}
