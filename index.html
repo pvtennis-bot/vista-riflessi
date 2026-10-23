@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.9">
+<meta name="app-version" content="3.10">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -197,6 +197,8 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 #fxcue{display:none;text-align:center;margin:2px 0 10px;min-height:92px}
 #fxcue b{display:block;font-size:min(14vw,58px);font-weight:800;letter-spacing:-.5px;line-height:1.1}
 #fxcue .fxd{width:min(34vw,128px);height:min(34vw,128px);border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:min(14vw,52px);font-weight:800;color:#10211c}
+#fxcue .fxd.big{width:min(62vw,250px);height:min(62vw,250px);font-size:min(34vw,130px);line-height:1}
+#fxcue .fxi{font-size:.28em;line-height:1.15;text-align:center;font-weight:800}
 #fxcue small{display:block;color:var(--tx2);font-size:14px;margin-top:2px}
 #mixp{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
 #mixp .mbox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 18px 16px;width:min(100%,440px);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -458,7 +460,7 @@ const R={
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]},
  misto:{k:'misto',name:'Sessione mista',acc:'blue',days:[],steps:[]}
 };
-const VER='3.9',VER_DATE='23/10/2026';
+const VER='3.10',VER_DATE='23/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -1032,8 +1034,8 @@ function fxDot(st,kind,dig,sub){const e=$('fxcue');if(!e)return;const fix=kind==
  const m={g:['#2fd49f','●','SCHERMO',kind==='lv'?(sub||''):fix?'guarda il tablet, aspetta il comando':'guarda il tablet'],
   dx:['#ff5a5f','▶','ESTERNO · DESTRA',fix?'fissa il segnale di destra':'guarda il bersaglio a destra'],
   sx:['#ffd23f','◀','ESTERNO · SINISTRA',fix?'fissa il segnale di sinistra':'guarda il bersaglio a sinistra']}[st];
- e.style.display='block';e.style.minHeight='200px';
- e.innerHTML='<div class="fxd" style="background:'+m[0]+'">'+(kind==='lv'&&st==='g'?(dig||'●'):m[1])+'</div><b style="color:'+m[0]+';font-size:min(8vw,30px)">'+m[2]+'</b><small>'+m[3]+'</small>';}
+ e.style.display='block';e.style.minHeight=kind==='lv'?'300px':'200px';
+ e.innerHTML='<div class="fxd'+(kind==='lv'?' big':'')+'" style="background:'+m[0]+'">'+(kind==='lv'&&st==='g'?(dig||'●'):m[1])+'</div><b style="color:'+m[0]+';font-size:min(8vw,30px)">'+m[2]+'</b><small>'+m[3]+'</small>';}
 function fxUnlock(){if(fxU||!cur||!cur.steps[idx].fx||!P.voice||!P.snd||!('speechSynthesis' in window))return;fxU=1;
  try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}
 function fxSay(t){if(!P.snd||!P.voice||!('speechSynthesis' in window))return;
@@ -1042,10 +1044,15 @@ let lvPh='S',lvSide='';
 const CN=['blu','viola','arancio','bianco'],CC=['#3b82f6','#a855f7','#fb923c','#ffffff'];
 let lvT='',lvN=0,lvS=0;
 function lvInit(s){lvN=0;lvS=0;lvT=s.scr==='colori'?CN[Math.floor(Math.random()*4)]:s.scr==='numeri'?String(1+Math.floor(Math.random()*9)):'';}
-function lvSub(s){return s.scr==='colori'?'conta il '+lvT.toUpperCase():s.scr==='numeri'?'conta il '+lvT:'somma tutti i numeri';}
+function lvSub(s){return '';}
+function lvIntro(s){let h;
+ if(s.scr==='colori'){const k=CN.indexOf(lvT);h='<span class="fxi">CONTA<span style="display:block;width:2.4em;height:2.4em;border-radius:14px;background:'+CC[k]+';margin:5px auto 3px"></span>'+lvT.toUpperCase()+'</span>';}
+ else if(s.scr==='numeri')h='<span class="fxi">CONTA IL<br><b style="font-size:3.2em;line-height:1">'+lvT+'</b></span>';
+ else h='<span class="fxi">SOMMA<br>TUTTO</span>';
+ fxDot('g','lv',h,'');}
 function lvShow(s){let h;
  if(s.scr==='colori'){const t=CN.indexOf(lvT);let k;if(Math.random()<.4)k=t;else{do{k=Math.floor(Math.random()*4);}while(k===t);}
-  if(k===t)lvN++;h='<span style="display:block;width:58%;height:58%;border-radius:14px;background:'+CC[k]+'"></span>';}
+  if(k===t)lvN++;h='<span style="display:block;width:62%;height:62%;border-radius:22px;background:'+CC[k]+'"></span>';}
  else if(s.scr==='numeri'){const t=+lvT;let n;if(Math.random()<.35)n=t;else{do{n=1+Math.floor(Math.random()*9);}while(n===t);}
   if(n===t)lvN++;h=String(n);}
  else{const n=1+Math.floor(Math.random()*6);lvS+=n;h=String(n);}
@@ -1069,7 +1076,7 @@ function lvStep(){if(!run)return;const s=cur.steps[idx];if(!s||!s.lv)return;
  else{lvPh='S';lvShow(s);beep(440,.14,.25);fxSay('Schermo');
   bpT=setTimeout(lvStep,1900+Math.random()*600);}}
 function schedFix(first){const s=cur.steps[idx];clearTimeout(bpT);if(!s.fx||!run)return;
- if(s.lv){if(first){lvPh='S';if(att===0&&left===s.d)lvInit(s);lvShow(s);bpT=setTimeout(lvStep,3500);}return;}
+ if(s.lv){if(first){lvPh='S';if(att===0&&left===s.d)lvInit(s);lvIntro(s);bpT=setTimeout(lvStep,3500);}return;}
  if(first&&s.fx)fxDot('g',s.dot?'':'fix');
  bpT=setTimeout(()=>{if(!run)return;fxCmd();schedFix();},att===0?(s.dot?3500:2200):s.iv[0]+Math.random()*(s.iv[1]-s.iv[0]));}
 function fxCmd(){let side=Math.random()<.5?'dx':'sx';
