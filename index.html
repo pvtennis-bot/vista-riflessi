@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.3">
+<meta name="app-version" content="3.6">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -458,7 +458,7 @@ const R={
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]},
  misto:{k:'misto',name:'Sessione mista',acc:'blue',days:[],steps:[]}
 };
-const VER='3.3',VER_DATE='23/10/2026';
+const VER='3.6',VER_DATE='23/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -522,7 +522,7 @@ function paintStep(){
  $('b-prev').disabled=idx===0;
  $('dots').innerHTML=cur.steps.map((_,i)=>'<div class="dot '+(i===idx?'on':dn[i]?'past':'')+'"></div>').join('');
  $('list').innerHTML=cur.steps.map((e,i)=>'<div class="checkrow'+(dn[i]?' done':'')+(i===idx?' cur':'')+'" onclick="jump('+i+')">'+
-   '<div class="box">'+(dn[i]?'✓':'')+'</div><div class="lbl">'+e.t+(e.fs?' 📱':'')+'</div><div class="d">'+fmt(e.d)+'</div></div>').join('');
+   '<div class="box">'+(dn[i]?'✓':'')+'</div><div class="lbl">'+e.t+(e.fs?' 📱':'')+'</div><div class="d">'+(e.man?'—':fmt(e.d))+'</div></div>').join('');
  paintTime();
 }
 function fmt(n){return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
@@ -533,7 +533,7 @@ function paintTime(){
  $('prog').style.strokeDashoffset=653.5*(1-left/s.d);
  $('b-play').textContent=s.fs?'▶  Avvia a schermo intero':(run?'❚❚  Pausa':(left===s.d?'▶  Inizia esercizio':'▶  Riprendi'));
 }
-function toggle(){const s=cur.steps[idx];if(s.fs&&!run){if(!P.warn){showWarn(()=>openFS(s));return;}openFS(s);return;}run?pause():play();}
+function toggle(){const s=cur.steps[idx];if(s.man&&!run){beepInit();go(1);setTimeout(()=>{if(!run)play();},250);return;}if(s.fs&&!run){if(!P.warn){showWarn(()=>openFS(s));return;}openFS(s);return;}run?pause():play();}
 /* ===== avvertenze ===== */
 let warnNext=null;
 function showWarn(next){warnNext=next||null;const done=!!P.warn;
@@ -1014,7 +1014,7 @@ function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.m
   passo:'Al comando <b>fissa</b> il segnale di <b>destra</b> o <b>sinistra</b>, poi fai un <b>passo laterale</b> verso quel lato e torna al centro, tenendo lo sguardo sul segnale fissato.'
  };
  const iv=c.task==='dot'?(d<15?[4500,6500]:[5500,7500]):(d<5?[3000,4500]:d<15?[3500,5000]:[4000,6000]),hold=d<15?2000:2600;
- const steps=[FS.H,FS.X,{t:'Posizioni e distanza',s:(partner?'con partner':'da solo')+' · 60 sec',d:60,i:c.task==='dot'?'dotbers':(partner?'compagno':'peri'),x:(c.task==='dot'?setupDot:setup)+(c.eye!=='both'?' <b>Un occhio solo:</b> usa il test del mirino per trovare il dominante; resta fermo, niente passi.':'')}];
+ const steps=[FS.H,FS.X,{t:'Posizioni e distanza',s:(partner?'con partner':'da solo')+' · prepara e avvia',d:60,man:true,i:c.task==='dot'?'dotbers':(partner?'compagno':'peri'),x:(c.task==='dot'?setupDot:setup)+(c.eye!=='both'?' <b>Un occhio solo:</b> usa il test del mirino per trovare il dominante; resta fermo, niente passi.':'')}];
  for(let i=1;i<=c.n;i++){const sw=partner&&i>c.n/2;
   steps.push({t:(c.task==='dot'?'Punto e bersaglio':'Fix DX/SX')+' · serie '+i+' di '+c.n,s:(sw?'ruoli scambiati · ':'')+'30 sec · '+(c.task==='dot'?'pallino e bip':'comando vocale'),d:30,i:c.task==='dot'?'dotbers':'fixlr',fx:true,dot:c.task==='dot',hold:hold,id:'F',iv:iv,
    x:(sw?'<b>Scambiate i ruoli</b>: chi era coach ora esegue, e il tablet va vicino a lui. ':'')+eyeTxt(c,i)+TXT[c.task]+' Alla fine indica quanti comandi hai eseguito bene.'});}
@@ -1023,7 +1023,10 @@ function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.m
 let fxLast='',fxRun=0,fxU=0;
 let fxRT=null;
 function fxHide(){clearTimeout(fxRT);const e=$('fxcue');if(e)e.style.display='none';}
-function fxDot(st){const e=$('fxcue');if(!e)return;const m={g:['#2fd49f','●','FISSA LO SCHERMO','pallino verde'],dx:['#ff5a5f','▶','DESTRA','guarda il bersaglio a destra'],sx:['#ffd23f','◀','SINISTRA','guarda il bersaglio a sinistra']}[st];
+function fxDot(st,kind){const e=$('fxcue');if(!e)return;const fix=kind==='fix';
+ const m={g:['#2fd49f','●','SCHERMO',fix?'guarda il tablet, aspetta il comando':'guarda il tablet'],
+  dx:['#ff5a5f','▶','ESTERNO · DESTRA',fix?'fissa il segnale di destra':'guarda il bersaglio a destra'],
+  sx:['#ffd23f','◀','ESTERNO · SINISTRA',fix?'fissa il segnale di sinistra':'guarda il bersaglio a sinistra']}[st];
  e.style.display='block';e.style.minHeight='200px';
  e.innerHTML='<div class="fxd" style="background:'+m[0]+'">'+m[1]+'</div><b style="color:'+m[0]+';font-size:min(8vw,30px)">'+m[2]+'</b><small>'+m[3]+'</small>';}
 function fxUnlock(){if(fxU||!cur||!cur.steps[idx].fx||!P.voice||!P.snd||!('speechSynthesis' in window))return;fxU=1;
@@ -1031,18 +1034,17 @@ function fxUnlock(){if(fxU||!cur||!cur.steps[idx].fx||!P.voice||!P.snd||!('speec
 function fxSay(t){if(!P.snd||!P.voice||!('speechSynthesis' in window))return;
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='it-IT';u.rate=1.05;u.volume=1;speechSynthesis.speak(u);}catch(e){}}
 function schedFix(first){const s=cur.steps[idx];clearTimeout(bpT);if(!s.fx||!run)return;
- if(s.dot&&first)fxDot('g');
- bpT=setTimeout(()=>{if(!run)return;fxCmd();schedFix();},att===0?2200:s.iv[0]+Math.random()*(s.iv[1]-s.iv[0]));}
+ if(first&&s.fx)fxDot('g',s.dot?'':'fix');
+ bpT=setTimeout(()=>{if(!run)return;fxCmd();schedFix();},att===0?(s.dot?3500:2200):s.iv[0]+Math.random()*(s.iv[1]-s.iv[0]));}
 function fxCmd(){let side=Math.random()<.5?'dx':'sx';
  if(side===fxLast&&fxRun>=2)side=side==='dx'?'sx':'dx';
  if(side===fxLast)fxRun++;else{fxLast=side;fxRun=1;}
  att++;const dx=side==='dx',e=$('fxcue'),sp=cur.steps[idx];
- if(sp.dot){fxDot(side);clearTimeout(fxRT);fxRT=setTimeout(()=>{if(run){fxDot('g');beep(440,.14,.25);}},sp.hold||2000);
-  beep(dx?880:620,.16,.28);if(P.snd&&navigator.vibrate)navigator.vibrate(dx?[50]:[30,40,30]);fxSay(dx?'Destra':'Sinistra');paintTime();return;}
- e.style.display='block';
- e.innerHTML='<b style="color:'+(dx?'#2fd49f':'#5aa9ff')+'">'+(dx?'DESTRA':'SINISTRA')+'</b><small>'+(dx?'fissa questo lato  ▸':'◂  fissa questo lato')+'</small>';
+ if(sp.dot){fxDot(side);clearTimeout(fxRT);fxRT=setTimeout(()=>{if(run){fxDot('g');beep(440,.14,.25);fxSay('Schermo');}},sp.hold||2000);
+  beep(dx?880:620,.16,.28);if(P.snd&&navigator.vibrate)navigator.vibrate(dx?[50]:[30,40,30]);fxSay(dx?'Esterno destra':'Esterno sinistra');paintTime();return;}
+ fxDot(side,'fix');
  beep(dx?880:620,.16,.28);if(P.snd&&navigator.vibrate)navigator.vibrate(dx?[50]:[30,40,30]);
- fxSay(dx?'Destra':'Sinistra');paintTime();}
+ fxSay(dx?'Esterno destra':'Esterno sinistra');paintTime();}
 function askFix(){signal();fxHide();const s=cur.steps[idx];let v=att;
  $('askp-box').innerHTML='<h3>'+s.t+'</h3><p>Comandi: <b>'+att+'</b> · quanti eseguiti bene?<br><span style="font-size:12px">(sguardo sul lato giusto e risposta corretta)</span></p>'+
   '<div class="cnt"><button onclick="fxAdj(-1)">−</button><b id="fxv">'+v+'</b><button onclick="fxAdj(1)">+</button></div>'+
@@ -1056,6 +1058,8 @@ function mxBlock(){const rows=[];
   rows.push('<div class="l"><span style="padding-right:10px">'+esc(String(s.date).replace(/\/\d{4}$/,''))+' · '+esc(mxCfgText(s.rf[0]))+'</span><b>'+O+'/'+T+' · '+(T?Math.round(O/T*100):0)+'%</b></div>');}
  if(!rows.length)return'';
  return'<div class="sum"><h4 style="margin:0 0 2px;font-size:14px">Sessione mista</h4><p class="note" style="margin:0 0 6px">Comandi eseguiti bene, ultime sessioni. Confronta solo prove con stessa distanza, stesso compito e stessi occhi.</p>'+rows.join('')+'</div>';}
+const _pt0=paintTime;
+paintTime=function(){_pt0();if(!cur)return;const s=cur.steps[idx];if(s&&s.man){$('p-time').textContent='✓';$('p-state').textContent='sistema tutto, poi premi Avvia';$('prog').style.strokeDashoffset=0;$('b-play').textContent='▶  Sono in posizione · Avvia';}};
 const _paintProg0=paintProg;
 paintProg=function(){_paintProg0();const b=mxBlock();if(b)$('prog-body').insertAdjacentHTML('beforeend',b);};
 paintSw();
