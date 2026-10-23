@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.1">
+<meta name="app-version" content="3.2">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -193,6 +193,19 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 #wipe .inp{text-align:center;font:16px/1.4 system-ui;letter-spacing:2px}
 .wlink{display:block;margin:22px auto 0;background:none;border:0;color:#f5c542;font-size:14px;cursor:pointer;padding:6px 10px}
 .gc{background:#4285F4;color:#04101f}
+.card.blue .tag{background:rgba(90,169,255,.15);color:#5aa9ff}
+#fxcue{display:none;text-align:center;margin:2px 0 10px;min-height:92px}
+#fxcue b{display:block;font-size:min(14vw,58px);font-weight:800;letter-spacing:-.5px;line-height:1.1}
+#fxcue small{display:block;color:var(--tx2);font-size:14px;margin-top:2px}
+#mixp{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+#mixp .mbox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 18px 16px;width:min(100%,440px);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#mixp h3{margin:0 0 4px;font-size:19px}
+#mixp .lb{font-size:12px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px}
+#mixp .segs{margin:0}
+#mixp .info{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--tx2);margin-top:12px;line-height:1.5}
+#mixp .info b{color:var(--tx);font-weight:500}
+#mixp .fill{background:#5aa9ff;margin-top:14px}
+#mixp .ghost{margin-top:14px}
 </style>
 </head>
 <body>
@@ -234,6 +247,14 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     <h2>Allenatore visivo <span id="d-schermo" class="done-dot"></span></h2>
     <p>Punto luminoso a schermo intero da seguire con gli occhi</p>
     <div class="meta"><span>5 esercizi</span><span>2,5 min</span></div>
+    <span class="go">›</span>
+  </button>
+
+  <button class="card blue" id="c-misto" onclick="mxOpen()">
+    <span class="tag">IN CAMPO · CON PARTNER O DA SOLO</span>
+    <h2>Sessione mista <span id="d-misto" class="done-dot"></span></h2>
+    <p>Fix destra/sinistra e visione periferica, tra schermo e campo</p>
+    <div class="meta"><span>6–10 passi</span><span>~6 min</span><span>📱 + 🎾</span></div>
     <span class="go">›</span>
   </button>
 
@@ -281,6 +302,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   <div class="opt">Bersaglio interno (attenzione) <button class="seg" id="tg-btn" onclick="cycTg()">Colori</button></div>
   <div class="opt">Match point (solo Somma) <div class="sw" id="sw-mp" onclick="tog('mp')"><i></i></div></div>
   <div class="opt">Suono e vibrazione <div class="sw on" id="sw-snd" onclick="tog('snd')"><i></i></div></div>
+  <div class="opt">Voce comandi (Sessione mista) <div class="sw on" id="sw-voice" onclick="tog('voice')"><i></i></div></div>
   <div class="opt">Schermo sempre acceso <div class="sw on" id="sw-wake" onclick="tog('wake')"><i></i></div></div>
 
   <button class="wlink" onclick="showWarn()">⚠️ Avvertenze</button>
@@ -317,6 +339,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
     </svg>
     <div class="time"><div class="tt" id="p-time">0:30</div><div class="ts" id="p-state">in pausa</div></div>
   </div>
+  <div id="fxcue"></div>
   <div class="icon" id="p-icon"></div>
   <div class="instr" id="p-instr"></div>
   <div class="ctrls" style="gap:10px">
@@ -339,6 +362,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
   <button class="ghost" id="warn-no" onclick="warnNo()">Annulla</button>
 </div></div>
 <div id="askp"><div class="abox" id="askp-box"></div></div>
+<div id="mixp"><div class="mbox" id="mix-box"></div></div>
 
 <div id="done" class="hidden">
   <div class="big">
@@ -369,6 +393,7 @@ textarea.inp{min-height:110px;font:13px/1.4 ui-monospace,Menlo,monospace}
 </div>
 <script>
 const ICONS={
+ fixlr:'<svg width="140" height="70" viewBox="0 0 140 70"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="70" cy="52" rx="16" ry="9"/><circle cx="70" cy="52" r="4.5" fill="currentColor"/><circle cx="16" cy="16" r="8" fill="currentColor"/><circle cx="124" cy="16" r="8"/><path stroke-dasharray="4 4" d="M62 46L24 21M78 46l38-25"/></g></svg>',
  sacc:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="42" cy="22" rx="16" ry="10"/><ellipse cx="78" cy="22" rx="16" ry="10"/><circle cx="42" cy="22" r="4.5" fill="currentColor"/><circle cx="78" cy="22" r="4.5" fill="currentColor"/><path d="M24 48h72M28 44l-5 4 5 4M92 44l5 4-5 4"/></g></svg>',
  saccv:'<svg width="120" height="64" viewBox="0 0 120 64"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="42" cy="32" rx="16" ry="10"/><ellipse cx="78" cy="32" rx="16" ry="10"/><circle cx="42" cy="32" r="4.5" fill="currentColor"/><circle cx="78" cy="32" r="4.5" fill="currentColor"/><path d="M104 10v44M100 14l4-5 4 5M100 50l4 5 4-5"/></g></svg>',
  fuoco:'<svg width="140" height="64" viewBox="0 0 140 64"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="24" cy="32" rx="16" ry="10"/><circle cx="24" cy="32" r="4.5" fill="currentColor"/><circle cx="62" cy="32" r="7" fill="currentColor"/><circle cx="116" cy="32" r="3" fill="currentColor"/><path stroke-dasharray="4 4" d="M44 32h66"/></g></svg>',
@@ -428,15 +453,16 @@ const R={
   FS.G,
   {t:'Presa a sorpresa col compagno',s:'se hai un compagno · 60 sec',d:60,i:'compagno',x:'Il compagno tiene la pallina all\'altezza della tua spalla, a 1 m. La <b>lascia senza avvisare</b>: la prendi al volo. Poi a due mani con due palline: lui ne lascia una sola, tu scegli quale mano. Se sei solo, salta con ›.'}
  ]},
- schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]}
+ schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]},
+ misto:{k:'misto',name:'Sessione mista',acc:'blue',days:[],steps:[]}
 };
-const VER='3.1',VER_DATE='01/10/2026';
+const VER='3.2',VER_DATE='23/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
 const SS=JSON.parse(localStorage.getItem('vr-sess')||'[]');
 const DAYS=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-let res=[],rp=[],att=0,bpT=null;let cur=null,idx=0,left=0,run=false,tick=null,dn=[],wl=null,ac=null,t0=null,lastSess=null;
+let res=[],rp=[],rf=[],att=0,bpT=null;let cur=null,idx=0,left=0,run=false,tick=null,dn=[],wl=null,ac=null,t0=null,lastSess=null;
 
 function save(){localStorage.setItem('vr-pref',JSON.stringify(P));localStorage.setItem('vr-log',JSON.stringify(L));
  localStorage.setItem('vr-sess',JSON.stringify(SS.slice(-300)));}
@@ -448,7 +474,7 @@ function tog(k){P[k]=P[k]?0:1;save();paintSw();if(k==='wake'&&!P.wake)relWake();
 function cycTg(){P.target={off:'col',col:'num',num:'sum',sum:'off'}[P.target||'col'];save();paintSw();}
 function cycBr(){P.breath=(P.breath||'base')==='base'?'prof':'base';save();paintSw();}
 function cycPace(){P.pace={lento:'medio',medio:'veloce',veloce:'lento'}[P.pace||'lento'];save();paintSw();}
-function paintSw(){$('br-btn').textContent=(P.breath||'base')==='base'?'Base 4 · 6':'Profondo 4 · 2 · 6 · 2';$('pace-btn').textContent={lento:'Lento 5–8 s',medio:'Medio 4–6 s',veloce:'Veloce 2,5–4 s'}[P.pace||'lento'];$('tg-btn').textContent={off:'Spento',col:'Colori',num:'Numeri',sum:'Somma'}[P.target||'col'];$('sw-mp').className='sw'+(P.mp?' on':'');$('sw-auto').className='sw'+(P.auto?' on':'');$('sw-snd').className='sw'+(P.snd?' on':'');$('sw-wake').className='sw'+(P.wake?' on':'');}
+function paintSw(){$('br-btn').textContent=(P.breath||'base')==='base'?'Base 4 · 6':'Profondo 4 · 2 · 6 · 2';$('pace-btn').textContent={lento:'Lento 5–8 s',medio:'Medio 4–6 s',veloce:'Veloce 2,5–4 s'}[P.pace||'lento'];$('tg-btn').textContent={off:'Spento',col:'Colori',num:'Numeri',sum:'Somma'}[P.target||'col'];$('sw-mp').className='sw'+(P.mp?' on':'');$('sw-auto').className='sw'+(P.auto?' on':'');$('sw-snd').className='sw'+(P.snd?' on':'');$('sw-wake').className='sw'+(P.wake?' on':'');$('sw-voice').className='sw'+(P.voice?' on':'');}
 
 function streak(){let n=0,d=new Date();if(!(L[key(d)]||[]).length)d.setDate(d.getDate()-1);
  while((L[key(d)]||[]).length){n++;d.setDate(d.getDate()-1);}return n;}
@@ -460,6 +486,7 @@ function paintHome(){
  $('d-campo').textContent=today.includes('campo')?' ✓':'';
  $('d-schermo').textContent=today.includes('schermo')?' ✓':'';
  $('d-presa').textContent=today.includes('presa')?' ✓':'';
+ $('d-misto').textContent=today.includes('misto')?' ✓':'';
  $('c-casa').classList.toggle('today',R.casa.days.includes(wd));
  $('c-campo').classList.toggle('today',R.campo.days.includes(wd));
  $('uname').value=P.name||'';
@@ -477,13 +504,14 @@ function paintHome(){
  $('nav-sub').textContent=lm.length?'Ultima sessione: risposte esatte '+lm[0]:'Precisione e attenzione nel tempo';
 }
 
-function start(k){cur=R[k];idx=0;dn=[];res=[];rp=[];att=0;left=cur.steps[0].d;run=false;t0=new Date();
- const AC={teal:['#2fd49f','#0f6e56'],coral:['#ff8a5c','#993c1d'],amber:['#f5c542','#7a5a0c'],violet:['#a78bfa','#5b3fa8']}[cur.acc];
+function start(k){cur=R[k];idx=0;dn=[];res=[];rp=[];rf=[];att=0;left=cur.steps[0].d;run=false;t0=new Date();
+ const AC={teal:['#2fd49f','#0f6e56'],coral:['#ff8a5c','#993c1d'],amber:['#f5c542','#7a5a0c'],violet:['#a78bfa','#5b3fa8'],blue:['#5aa9ff','#1f4f8a']}[cur.acc];
  document.documentElement.style.setProperty('--acc',AC[0]);document.documentElement.style.setProperty('--acc-d',AC[1]);
  $('home').classList.add('hidden');$('done').classList.add('hidden');$('player').classList.remove('hidden');
  $('rname').textContent=cur.name;paintStep();window.scrollTo(0,0);}
 
 function paintStep(){
+ $('fxcue').style.display='none';
  const s=cur.steps[idx];
  $('p-num').textContent='Esercizio '+(idx+1)+' di '+cur.steps.length;
  $('p-title').textContent=s.t;$('p-sub').textContent=s.s;
@@ -499,7 +527,7 @@ function fmt(n){return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
 function paintTime(){
  if(!cur)return; /* Progressi aperti senza una routine in corso */
  const s=cur.steps[idx];$('p-time').textContent=fmt(Math.max(0,left));
- $('p-state').textContent=run?(s.bp?att+' segnali':'in corso'):(left===s.d?(s.bp?'parte al primo beep':'pronto'):'in pausa');
+ $('p-state').textContent=run?(s.bp?att+' segnali':s.fx?att+(att===1?' comando':' comandi'):'in corso'):(left===s.d?(s.bp?'parte al primo beep':s.fx?'parte al primo comando':'pronto'):'in pausa');
  $('prog').style.strokeDashoffset=653.5*(1-left/s.d);
  $('b-play').textContent=s.fs?'▶  Avvia a schermo intero':(run?'❚❚  Pausa':(left===s.d?'▶  Inizia esercizio':'▶  Riprendi'));
 }
@@ -513,9 +541,9 @@ function showWarn(next){warnNext=next||null;const done=!!P.warn;
  $('warn').style.display='flex';$('warn').querySelector('.wbox').scrollTop=0;}
 function warnYes(){if(!P.warn){P.warn=Date.now();save();}$('warn').style.display='none';const n=warnNext;warnNext=null;if(n)n();}
 function warnNo(){$('warn').style.display='none';warnNext=null;}
-function play(){if(run)return;run=true;beepInit();reqWake();schedBeep();
+function play(){if(run)return;run=true;beepInit();reqWake();schedBeep();fxUnlock();schedFix();
  tick=setInterval(()=>{left--;if(left<=0){clearInterval(tick);run=false;clearTimeout(bpT);
-   if(cur.steps[idx].bp&&att>0)askCatch();else done();}paintTime();},1000);paintTime();}
+   if(cur.steps[idx].bp&&att>0)askCatch();else if(cur.steps[idx].fx&&att>0)askFix();else done();}paintTime();},1000);paintTime();}
 function schedBeep(){const s=cur.steps[idx];clearTimeout(bpT);if(!s.bp||!run)return;
  bpT=setTimeout(()=>{if(!run)return;att++;beep(1040,.13,.3);if(navigator.vibrate)navigator.vibrate(60);
   const r=document.querySelector('.ring');r.classList.add('flash');setTimeout(()=>r.classList.remove('flash'),220);paintTime();schedBeep();},
@@ -529,7 +557,7 @@ function askCatch(){signal();const s=cur.steps[idx];let v=att;
  window.acAdj=n=>{v=Math.max(0,Math.min(att,v+n));$('acv').textContent=v;};
  window.acOk=()=>{rp[idx]={id:s.id,t:att,ok:v};$('askp').style.display='none';att=0;done();};
  draw();$('askp').style.display='flex';}
-function pause(){run=false;clearInterval(tick);clearTimeout(bpT);relWake();paintTime();}
+function pause(){run=false;clearInterval(tick);clearTimeout(bpT);relWake();fxHide();paintTime();}
 function done(){dn[idx]=1;signal();att=0;
  if(idx<cur.steps.length-1){idx++;left=cur.steps[idx].d;paintStep();if(P.auto)setTimeout(play,900);}
  else{finish();}}
@@ -542,11 +570,14 @@ function finish(){pause();
  const ndone=dn.filter(Boolean).length;
  lastSess={r:cur.name,rk:keyOf(cur),name:P.name||'',day:DAYS[end.getDay()],date:itDate(end),
    iso:k,start:hm(st),end:hm(end),min:Math.max(1,Math.round((end-st)/60000)),
-   n:ndone,tot:cur.steps.length,ex:cur.steps.map((e,i)=>(dn[i]?'✓ ':'· ')+e.t+' ('+e.s+')'+(rp[i]?' · prese '+rp[i].ok+'/'+rp[i].t:'')+(res[i]?' · '+(res[i].m==='sum'?'somma':'conteggio')+' '+res[i].ans+'/'+res[i].real+(res[i].ans===res[i].real?' ✔':'')+(res[i].mp?' · MP':''):'')),
+   n:ndone,tot:cur.steps.length,ex:cur.steps.map((e,i)=>(dn[i]?'✓ ':'· ')+e.t+' ('+e.s+')'+(rp[i]?' · prese '+rp[i].ok+'/'+rp[i].t:'')+(rf[i]?' · fix '+rf[i].ok+'/'+rf[i].t:'')+(res[i]?' · '+(res[i].m==='sum'?'somma':'conteggio')+' '+res[i].ans+'/'+res[i].real+(res[i].ans===res[i].real?' ✔':'')+(res[i].mp?' · MP':''):'')),
    att:res.filter(Boolean).length?res.filter(r=>r&&r.ans===r.real).length+'/'+res.filter(Boolean).length:'',
    ms:st.getTime(),me:end.getTime()};
  lastSess.rs=res.filter(Boolean);lastSess.rp=rp.filter(Boolean);
- {const T=lastSess.rp.reduce((a,b)=>a+b.t,0),O=lastSess.rp.reduce((a,b)=>a+b.ok,0);lastSess.pr=T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';}SS.push(lastSess);save();
+ {const T=lastSess.rp.reduce((a,b)=>a+b.t,0),O=lastSess.rp.reduce((a,b)=>a+b.ok,0);lastSess.pr=T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';}
+ lastSess.rf=rf.filter(Boolean);
+ {const T=lastSess.rf.reduce((a,b)=>a+b.t,0),O=lastSess.rf.reduce((a,b)=>a+b.ok,0);lastSess.fxs=T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';lastSess.cfg=lastSess.rf.length?mxCfgText(lastSess.rf[0]):'';}
+ SS.push(lastSess);save();
  $('player').classList.add('hidden');$('done').classList.remove('hidden');
  $('done-txt').textContent='Serie: '+streak()+' giorni consecutivi';
  $('sum').innerHTML=
@@ -557,14 +588,15 @@ function finish(){pause();
    '<div class="l"><span>Durata</span><b>'+lastSess.min+' min</b></div>'+
    '<div class="l"><span>Esercizi</span><b>'+lastSess.n+'/'+lastSess.tot+'</b></div>'+
    (lastSess.att?'<div class="l"><span>Risposte esatte</span><b>'+lastSess.att+'</b></div>':'')+
-   (lastSess.pr?'<div class="l"><span>Prese pulite</span><b>'+lastSess.pr+'</b></div>':'')+'<hr>'+
+   (lastSess.pr?'<div class="l"><span>Prese pulite</span><b>'+lastSess.pr+'</b></div>':'')+
+   (lastSess.fxs?'<div class="l"><span>Fix eseguiti bene</span><b>'+lastSess.fxs+'</b></div>':'')+'<hr>'+
    lastSess.ex.map(e=>'<div class="ex">'+esc(e)+'</div>').join('');
  window.scrollTo(0,0);}
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 
 function sessText(s){return '👁️ VISTA & RIFLESSI\n'+(s.name?'Atleta: '+s.name+'\n':'')+
  'Routine: '+s.r+'\n'+s.day.charAt(0).toUpperCase()+s.day.slice(1)+' '+s.date+' · '+s.start+'–'+s.end+' ('+s.min+' min)\n'+
- 'Esercizi: '+s.n+'/'+s.tot+(s.att?'\nRisposte esatte: '+s.att:'')+(s.pr?'\nPrese pulite: '+s.pr:'')+'\n\n'+s.ex.join('\n');}
+ 'Esercizi: '+s.n+'/'+s.tot+(s.att?'\nRisposte esatte: '+s.att:'')+(s.pr?'\nPrese pulite: '+s.pr:'')+(s.fxs?'\nFix DX/SX: '+s.fxs+(s.cfg?' · '+s.cfg:''):'')+'\n\n'+s.ex.join('\n');}
 function shareWA(){const t=sessText(lastSess);
  if(navigator.share){navigator.share({text:t}).catch(()=>waLink(t));}else waLink(t);}
 function waLink(t){window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}
@@ -591,7 +623,7 @@ function allText(){if(!SS.length)return'Nessuna sessione registrata.';
   SS.slice().reverse().slice(0,40).map(s=>s.date+' ('+s.day+') '+s.start+' · '+s.r+' · '+s.n+'/'+s.tot+' es'+(s.att?' · esatte '+s.att:'')+(s.pr?' · prese '+s.pr:'')).join('\n')+
   (SS.length>40?'\n… ('+(SS.length-40)+' sessioni precedenti nel codice)':'');}
 /* backup compatto */
-function packAll(){return{v:1,name:P.name||'',ss:SS.map(s=>({k:s.rk,a:s.ms,b:s.me,n:s.n,t:s.tot,r:(s.rs||[]).map(x=>[x.id,x.m,x.real,x.ans,x.mp?1:0]),p:(s.rp||[]).map(x=>[x.id,x.t,x.ok])}))};}
+function packAll(){return{v:1,name:P.name||'',ss:SS.map(s=>({k:s.rk,a:s.ms,b:s.me,n:s.n,t:s.tot,r:(s.rs||[]).map(x=>[x.id,x.m,x.real,x.ans,x.mp?1:0]),p:(s.rp||[]).map(x=>[x.id,x.t,x.ok]),f:(s.rf||[]).map(x=>[x.t,x.ok,x.pre,x.d,x.md,x.sp])}))};}
 function b64e(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
 function b64d(t){return JSON.parse(decodeURIComponent(escape(atob(t))));}
 function code(){return 'VR1:'+b64e(packAll());}
@@ -659,6 +691,8 @@ function restoreText(t){let o=null;t=String(t||'').trim();
   SS.push({r:R0.name,rk:c.k,name:o.name||'',day:DAYS[en.getDay()],date:itDate(en),iso:key(en),start:hm(st),end:hm(en),
    min:Math.max(1,Math.round((c.b-c.a)/60000)),n:c.n,tot:c.t,ex:[],ms:c.a,me:c.b,
    rs:(c.r||[]).map(x=>({id:x[0],m:x[1],real:x[2],ans:x[3],mp:x[4]?1:0})),rp:(c.p||[]).map(x=>({id:x[0],t:x[1],ok:x[2]})),
+   rf:(c.f||[]).map(x=>({id:'F',t:x[0],ok:x[1],pre:x[2],d:x[3],md:x[4],sp:x[5]})),
+   fxs:(c.f&&c.f.length)?(()=>{const T=c.f.reduce((a,b)=>a+b[0],0),O=c.f.reduce((a,b)=>a+b[1],0);return T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';})():'',
    pr:(c.p&&c.p.length)?(()=>{const T=c.p.reduce((a,b)=>a+b[1],0),O=c.p.reduce((a,b)=>a+b[2],0);return T?O+'/'+T+' ('+Math.round(O/T*100)+'%)':'';})():'',
    att:(c.r&&c.r.length)?c.r.filter(x=>x[2]===x[3]).length+'/'+c.r.length:''});
   const k=key(en);L[k]=L[k]||[];if(!L[k].includes(c.k))L[k].push(c.k);add++;}
@@ -746,7 +780,7 @@ function presaChart(nw){nw=Math.max(4,Math.round(nw));const m0=monday(new Date()
    '<text x="'+cx+'" y="'+(Y(p.v)-5)+'" font-size="10" fill="#eaf2ee" text-anchor="middle">'+Math.round(p.v)+'</text>';});
  return'<div class="chart"><h4>Prese pulite al beep</h4><p>% prese riuscite per settimana (tocco spalla + doppio rilascio)</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg></div>';}
 function heat(){const m0=monday(new Date()),nw=8,cs=34,gap=5,W=340,x0=W-(7*cs+6*gap),H=nw*(22)+18;
- const col={casa:'#2fd49f',campo:'#ff8a5c',schermo:'#f5c542',presa:'#a78bfa'};let g='';
+ const col={casa:'#2fd49f',campo:'#ff8a5c',schermo:'#f5c542',presa:'#a78bfa',misto:'#5aa9ff'};let g='';
  ['L','M','M','G','V','S','D'].forEach((l,j)=>g+='<text x="'+(x0+j*(cs+gap)+cs/2)+'" y="10" font-size="10" fill="#9db0a8" text-anchor="middle">'+l+'</text>');
  for(let w=0;w<nw;w++){const a=new Date(m0);a.setDate(a.getDate()-7*(nw-1-w));const y=16+w*22;
   g+='<text x="0" y="'+(y+12)+'" font-size="10" fill="#9db0a8">'+a.getDate()+'/'+(a.getMonth()+1)+'</text>';
@@ -754,7 +788,7 @@ function heat(){const m0=monday(new Date()),nw=8,cs=34,gap=5,W=340,x0=W-(7*cs+6*
    const c=v.length?col[v[v.length-1]]||'#2fd49f':'#26332e';
    g+='<rect x="'+(x0+j*(cs+gap))+'" y="'+y+'" width="'+cs+'" height="17" rx="5" fill="'+c+'" opacity="'+(fut?.25:v.length>1?1:v.length?.8:1)+'"'+(v.length>1?' stroke="#fff" stroke-width="1.2"':'')+'/>';}}
  return'<div class="chart"><h4>Costanza · ultime 8 settimane</h4><p>Bordo bianco = più routine nello stesso giorno</p><svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg>'+
-  '<div class="leg"><span style="--c:#2fd49f">casa</span><span style="--c:#ff8a5c">pre-match</span><span style="--c:#f5c542">schermo</span><span style="--c:#a78bfa">presa</span></div></div>';}
+  '<div class="leg"><span style="--c:#2fd49f">casa</span><span style="--c:#ff8a5c">pre-match</span><span style="--c:#f5c542">schermo</span><span style="--c:#a78bfa">presa</span><span style="--c:#5aa9ff">mista</span></div></div>';}
 function keyOf(r){return r.k;}
 function quit(){pause();home();}
 function home(){pause();$('progv').classList.add('hidden');$('player').classList.add('hidden');$('done').classList.add('hidden');$('home').classList.remove('hidden');paintHome();window.scrollTo(0,0);}
@@ -905,6 +939,99 @@ function confirmSum(e){e.stopPropagation();if(F.aS==='')return;const t=F.tg,real
  $('fs-cd').innerHTML='<div class="res">'+h+'</div>';
  setTimeout(()=>{closeFS();left=0;done();},t.mp?2000:1800);}
 function exitFS(e){e.stopPropagation();closeFS();left=cur.steps[idx].d;paintStep();}
+/* ===== v3.2 · Sessione mista (Fix DX/SX) ===== */
+if(P.voice===undefined){P.voice=1;}
+const MXD={md:'partner',sp:'tennis',pre:'vicino',dist:8,n:4,task:'rileva'};
+const MX=Object.assign({},MXD,P.mx||{});
+const MXP={vicino:'Vicino',rete:'Rete',campo:'Campo',libera:'Libera'};
+const SEP=1.8; /* distanza fra i due segnali: braccia aperte, circa ±0,9 m dal centro */
+function mxDist(c){if(c.pre==='vicino')return 3;
+ if(c.pre==='rete')return c.sp==='tennis'?11.89:6.71;
+ if(c.pre==='campo')return c.sp==='tennis'?23.77:13.41;
+ return Math.max(1,Math.min(40,+c.dist||8));}
+function mxM(n){return String(Math.round(n*100)/100).replace('.',',');}
+function mxAng(d){return Math.round(Math.atan2(SEP,d)*180/Math.PI);}
+function mxCfgText(r){return (MXP[r.pre]||'')+' '+mxM(r.d||0)+' m · '+(r.md==='solo'?'da solo':'con partner')+' · '+(r.sp==='pickle'?'pickleball':'tennis');}
+function mxOpen(){mxDraw();$('mixp').style.display='flex';$('mix-box').scrollTop=0;}
+function mxClose(){$('mixp').style.display='none';}
+function mxSet(k,v){if(k==='n')v=parseInt(v,10);MX[k]=v;mxDraw();}
+function mxDin(v){MX.dist=parseFloat(String(v).replace(',','.'))||8;mxInfo();}
+function mxInfo(){const e=$('mx-info');if(!e)return;const c=MX,d=mxDist(c);
+ let t='Distanza <b>'+mxM(d)+' m</b> (circa '+Math.max(1,Math.round(d/0.75))+' passi) · periferia ≈ <b>'+mxAng(d)+'°</b>';
+ if(c.pre==='rete')t+='<br>Rete: '+(c.sp==='tennis'?'dalla baseline alla rete.':'dalla baseline alla rete del pickleball.');
+ if(c.pre==='campo')t+='<br>Campo: da baseline a baseline opposta.';
+ if(d>=10)t+='<br>Da lontano usa <b>palette o racchette</b> al posto delle palline.';
+ e.innerHTML=t;}
+function mxDraw(){const c=MX,partner=c.md==='partner';
+ if(partner&&c.task==='passo')c.task='cambio';
+ if(!partner&&c.task!=='cambio'&&c.task!=='passo')c.task='cambio';
+ const sg=(k,it)=>'<div class="segs">'+it.map(a=>'<button class="'+(String(c[k])===String(a[0])?'on':'')+'" onclick="mxSet(\''+k+'\',\''+a[0]+'\')">'+a[1]+'</button>').join('')+'</div>';
+ const tasks=partner?[['rileva','Rileva'],['cambio','Cambio'],['reagisci','Reagisci']]:[['cambio','Cambio'],['passo','Cambio + passo']];
+ $('mix-box').innerHTML='<h3>Sessione mista</h3><p class="note" style="margin:0">Schermo + campo: l\'app dà il comando <b>DX / SX</b>, tu fissi quel lato e tieni l\'altro in periferia.</p>'+
+  '<div class="lb">Modalità</div>'+sg('md',[['partner','Con partner'],['solo','Da solo']])+
+  '<div class="lb">Sport</div>'+sg('sp',[['tennis','Tennis'],['pickle','Pickleball']])+
+  '<div class="lb">Distanza</div>'+sg('pre',[['vicino','Vicino'],['rete','Rete'],['campo','Campo'],['libera','Libera']])+
+  (c.pre==='libera'?'<input class="inp" id="mx-d" type="number" inputmode="decimal" min="1" max="40" step="0.5" value="'+c.dist+'" oninput="mxDin(this.value)" style="margin-top:8px" placeholder="metri">':'')+
+  '<div class="lb">Compito</div>'+sg('task',tasks)+
+  '<div class="lb">Serie da 30 secondi</div>'+sg('n',[[2,'2'],[4,'4'],[6,'6']])+
+  '<div class="info" id="mx-info"></div>'+
+  '<div class="row2"><button class="ghost" onclick="mxClose()">Annulla</button><button class="fill" onclick="mxGo()">Avvia</button></div>';
+ mxInfo();}
+function mxGo(){mxClose();P.mx=Object.assign({},MX);save();
+ R.misto.cfg={pre:MX.pre,d:mxDist(MX),md:MX.md,sp:MX.sp};
+ R.misto.steps=buildMisto(MX);start('misto');}
+function buildMisto(c){const d=mxDist(c),ang=mxAng(d),pass=Math.max(1,Math.round(d/0.75)),big=d>=10,partner=c.md==='partner';
+ const ob=big?'la paletta':'la pallina',mk=big?'racchette o palette colorate':'una pallina';
+ const setup=partner
+  ?'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra voi due. <b>Esecutore</b>: posizione di attesa, sole alle spalle, tablet appoggiato vicino a te, volume alto. <b>Coach</b>: di fronte, braccia aperte, con '+mk+' per mano. Destra e sinistra sono <b>quelle di chi esegue</b>: la mano destra dell\'esecutore è la sinistra del coach. Fissando uno dei due, l\'altro cade a circa <b>'+ang+'°</b> di periferia.'
+  :'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra te e i due segnali. Metti due segnali (coni, palline appese, post-it) a <b>1,8 m</b> uno dall\'altro, all\'altezza del petto. Tablet vicino a te, volume alto, sole alle spalle. Fissando uno dei due, l\'altro cade a circa <b>'+ang+'°</b> di periferia.';
+ const TXT={
+  rileva:'Al comando <b>fissa</b> '+ob+' di <b>destra</b> o <b>sinistra</b> con un solo movimento, poi resta fermo. Mentre la fissi, il coach <b>alza o abbassa</b> l\'altra a sorpresa: tu dici <b>SU</b> o <b>GIÙ</b> senza spostare lo sguardo.',
+  cambio:partner
+   ?'Al comando <b>sposta lo sguardo</b> verso '+ob+' indicata con un solo movimento rapido, poi fermo. Il coach tiene le braccia ferme. L\'altra la senti con la coda dell\'occhio, senza guardarla.'
+   :'Al comando <b>fissa</b> il segnale di <b>destra</b> o <b>sinistra</b> con un solo movimento, poi fermo. L\'altro lo tieni con la coda dell\'occhio. A ogni comando cambi.',
+  reagisci:'Al comando <b>fissa</b> '+ob+' indicata. A sorpresa il coach <b>lascia cadere o abbassa di colpo</b> l\'altra: tu dici <b>ORA</b> e fai un passo verso quel lato, senza spostare lo sguardo da quella fissata.',
+  passo:'Al comando <b>fissa</b> il segnale di <b>destra</b> o <b>sinistra</b>, poi fai un <b>passo laterale</b> verso quel lato e torna al centro, tenendo lo sguardo sul segnale fissato.'
+ };
+ const iv=d<5?[3000,4500]:d<15?[3500,5000]:[4000,6000];
+ const steps=[FS.H,FS.X,{t:'Posizioni e distanza',s:(partner?'con partner':'da solo')+' · 60 sec',d:60,i:partner?'compagno':'peri',x:setup}];
+ for(let i=1;i<=c.n;i++){const sw=partner&&i>c.n/2;
+  steps.push({t:'Fix DX/SX · serie '+i+' di '+c.n,s:(sw?'ruoli scambiati · ':'')+'30 sec · comando vocale',d:30,i:'fixlr',fx:true,id:'F',iv:iv,
+   x:(sw?'<b>Scambiate i ruoli</b>: chi era coach ora esegue, e il tablet va vicino a lui. ':'')+TXT[c.task]+' Alla fine indica quanti comandi hai eseguito bene.'});}
+ steps.push(FS.B);
+ return steps;}
+let fxLast='',fxRun=0,fxU=0;
+function fxHide(){const e=$('fxcue');if(e)e.style.display='none';}
+function fxUnlock(){if(fxU||!cur||!cur.steps[idx].fx||!P.voice||!P.snd||!('speechSynthesis' in window))return;fxU=1;
+ try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}
+function fxSay(t){if(!P.snd||!P.voice||!('speechSynthesis' in window))return;
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='it-IT';u.rate=1.05;u.volume=1;speechSynthesis.speak(u);}catch(e){}}
+function schedFix(){const s=cur.steps[idx];clearTimeout(bpT);if(!s.fx||!run)return;
+ bpT=setTimeout(()=>{if(!run)return;fxCmd();schedFix();},att===0?2200:s.iv[0]+Math.random()*(s.iv[1]-s.iv[0]));}
+function fxCmd(){let side=Math.random()<.5?'dx':'sx';
+ if(side===fxLast&&fxRun>=2)side=side==='dx'?'sx':'dx';
+ if(side===fxLast)fxRun++;else{fxLast=side;fxRun=1;}
+ att++;const dx=side==='dx',e=$('fxcue');
+ e.style.display='block';
+ e.innerHTML='<b style="color:'+(dx?'#2fd49f':'#5aa9ff')+'">'+(dx?'DESTRA':'SINISTRA')+'</b><small>'+(dx?'fissa questo lato  ▸':'◂  fissa questo lato')+'</small>';
+ beep(dx?880:620,.16,.28);if(P.snd&&navigator.vibrate)navigator.vibrate(dx?[50]:[30,40,30]);
+ fxSay(dx?'Destra':'Sinistra');paintTime();}
+function askFix(){signal();fxHide();const s=cur.steps[idx];let v=att;
+ $('askp-box').innerHTML='<h3>'+s.t+'</h3><p>Comandi: <b>'+att+'</b> · quanti eseguiti bene?<br><span style="font-size:12px">(sguardo sul lato giusto e risposta corretta)</span></p>'+
+  '<div class="cnt"><button onclick="fxAdj(-1)">−</button><b id="fxv">'+v+'</b><button onclick="fxAdj(1)">+</button></div>'+
+  '<button class="fill" onclick="fxOk()">Conferma</button>';
+ window.fxAdj=n=>{v=Math.max(0,Math.min(att,v+n));$('fxv').textContent=v;};
+ window.fxOk=()=>{const g=R.misto.cfg||{};rf[idx]={id:'F',t:att,ok:v,pre:g.pre,d:g.d,md:g.md,sp:g.sp};$('askp').style.display='none';att=0;done();};
+ $('askp').style.display='flex';}
+function mxBlock(){const rows=[];
+ for(let i=SS.length-1;i>=0&&rows.length<8;i--){const s=SS[i];if(!(s.rf&&s.rf.length))continue;
+  const T=s.rf.reduce((a,b)=>a+b.t,0),O=s.rf.reduce((a,b)=>a+b.ok,0);
+  rows.push('<div class="l"><span style="padding-right:10px">'+esc(String(s.date).replace(/\/\d{4}$/,''))+' · '+esc(mxCfgText(s.rf[0]))+'</span><b>'+O+'/'+T+' · '+(T?Math.round(O/T*100):0)+'%</b></div>');}
+ if(!rows.length)return'';
+ return'<div class="sum"><h4 style="margin:0 0 2px;font-size:14px">Sessione mista · Fix DX/SX</h4><p class="note" style="margin:0 0 6px">Comandi eseguiti bene, ultime sessioni. Confronta solo prove con la stessa distanza e lo stesso compito.</p>'+rows.join('')+'</div>';}
+const _paintProg0=paintProg;
+paintProg=function(){_paintProg0();const b=mxBlock();if(b)$('prog-body').insertAdjacentHTML('beforeend',b);};
+paintSw();
 paintHome();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
