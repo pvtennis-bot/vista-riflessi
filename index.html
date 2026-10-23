@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.12">
+<meta name="app-version" content="3.13">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -460,7 +460,7 @@ const R={
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]},
  misto:{k:'misto',name:'Sessione mista',acc:'blue',days:[],steps:[]}
 };
-const VER='3.12',VER_DATE='23/10/2026';
+const VER='3.13',VER_DATE='23/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -519,7 +519,7 @@ function paintStep(){
  const s=cur.steps[idx];
  $('p-num').textContent='Esercizio '+(idx+1)+' di '+cur.steps.length;
  $('p-title').textContent=s.t;$('p-sub').textContent=s.s;
- $('p-instr').innerHTML=s.x;$('p-icon').innerHTML=ICONS[s.i];
+ $('p-instr').innerHTML=s.x;$('p-instr').style.display='';$('p-icon').innerHTML=ICONS[s.i];
  $('p-icon').style.color='var(--acc)';$('prog').style.color='var(--acc)';
  $('b-prev').disabled=idx===0;
  $('dots').innerHTML=cur.steps.map((_,i)=>'<div class="dot '+(i===idx?'on':dn[i]?'past':'')+'"></div>').join('');
@@ -545,7 +545,7 @@ function showWarn(next){warnNext=next||null;const done=!!P.warn;
  $('warn').style.display='flex';$('warn').querySelector('.wbox').scrollTop=0;}
 function warnYes(){if(!P.warn){P.warn=Date.now();save();}$('warn').style.display='none';const n=warnNext;warnNext=null;if(n)n();}
 function warnNo(){$('warn').style.display='none';warnNext=null;}
-function play(){if(run)return;run=true;beepInit();reqWake();schedBeep();fxUnlock();schedFix(1);
+function play(){if(run)return;run=true;if(cur.steps[idx].lv)$('p-instr').style.display='none';beepInit();reqWake();schedBeep();fxUnlock();schedFix(1);
  tick=setInterval(()=>{left--;if(left<=0){clearInterval(tick);run=false;clearTimeout(bpT);
    if(cur.steps[idx].bp&&att>0)askCatch();else if(cur.steps[idx].fx&&att>0)askFix();else done();}paintTime();},1000);paintTime();}
 function schedBeep(){const s=cur.steps[idx];clearTimeout(bpT);if(!s.bp||!run)return;
@@ -561,7 +561,7 @@ function askCatch(){signal();const s=cur.steps[idx];let v=att;
  window.acAdj=n=>{v=Math.max(0,Math.min(att,v+n));$('acv').textContent=v;};
  window.acOk=()=>{rp[idx]={id:s.id,t:att,ok:v};$('askp').style.display='none';att=0;done();};
  draw();$('askp').style.display='flex';}
-function pause(){run=false;clearInterval(tick);clearTimeout(bpT);relWake();fxHide();paintTime();}
+function pause(){run=false;$('p-instr').style.display='';clearInterval(tick);clearTimeout(bpT);relWake();fxHide();paintTime();}
 function done(){dn[idx]=1;signal();att=0;
  if(idx<cur.steps.length-1){idx++;left=cur.steps[idx].d;paintStep();if(P.auto)setTimeout(play,900);}
  else{finish();}}
@@ -1054,7 +1054,7 @@ function lvIntro(s){let h;
  d.style.background='transparent';d.style.border='8px dashed #cfd8d4';d.style.color='#eaf2ee';b.style.color='#cfd8d4';b.textContent='CONSEGNA · NON CONTARE';}
 function lvShow(s){let h;
  if(s.scr==='colori'){const t=CN.indexOf(lvT);let k;if(Math.random()<.4)k=t;else{do{k=Math.floor(Math.random()*4);}while(k===t);}
-  if(k===t)lvN++;h='<span style="display:block;width:62%;height:62%;border-radius:22px;background:'+CC[k]+'"></span>';}
+  if(k===t)lvN++;h='<span style="display:block;width:70%;height:70%;border-radius:24px;background:'+CC[k]+';box-shadow:0 0 0 5px #10211c"></span>';}
  else if(s.scr==='numeri'){const t=+lvT;let n;if(Math.random()<.35)n=t;else{do{n=1+Math.floor(Math.random()*9);}while(n===t);}
   if(n===t)lvN++;h=String(n);}
  else{const n=1+Math.floor(Math.random()*6);lvS+=n;h=String(n);}
