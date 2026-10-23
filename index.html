@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.7">
+<meta name="app-version" content="3.9">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -458,7 +458,7 @@ const R={
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]},
  misto:{k:'misto',name:'Sessione mista',acc:'blue',days:[],steps:[]}
 };
-const VER='3.7',VER_DATE='23/10/2026';
+const VER='3.9',VER_DATE='23/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -943,8 +943,8 @@ function confirmSum(e){e.stopPropagation();if(F.aS==='')return;const t=F.tg,real
 function exitFS(e){e.stopPropagation();closeFS();left=cur.steps[idx].d;paintStep();}
 /* ===== v3.2 · Sessione mista (Fix DX/SX) ===== */
 if(P.voice===undefined){P.voice=1;}
-const MXD={md:'partner',sp:'tennis',pre:'vicino',dist:8,n:4,task:'lv',eye:'both',dom:'',scr:'cifra'};
-const MXS={cifra:'cifre',colori:'colori',somma:'somme'};
+const MXD={md:'partner',sp:'tennis',pre:'vicino',dist:8,n:4,task:'lv',eye:'both',dom:'',scr:'colori'};
+const MXS={numeri:'numeri',colori:'colori',somma:'somme'};
 const MXT={dot:'Punto e bersaglio',lv:'Lontano ↔ Vicino',cambio:'Fix DX/SX',rileva:'Rileva',reagisci:'Reagisci',passo:'Fix + passo'};
 const MXE={both:'',dom:'occhio dominante',nondom:'occhio non dominante',alt:'occhi alternati'};
 const MX=Object.assign({},MXD,P.mx||{});
@@ -957,7 +957,7 @@ function mxDist(c){if(c.pre==='vicino')return 3;
 function mxM(n){return String(Math.round(n*100)/100).replace('.',',');}
 function mxAng(d){return Math.round(Math.atan2(SEP,d)*180/Math.PI);}
 function mxAngD(d){return Math.round(Math.atan2(SEP/2,d)*180/Math.PI);}
-function mxCfgText(r){return (MXP[r.pre]||'')+' '+mxM(r.d||0)+' m · '+(r.md==='solo'?'da solo':'con partner')+' · '+(r.sp==='pickle'?'pickleball':'tennis')+(r.tk&&MXT[r.tk]?' · '+MXT[r.tk]+(r.tk==='lv'&&r.sc&&r.sc!=='cifra'?' ('+MXS[r.sc]+')':''):'')+(r.ey&&MXE[r.ey]?' · '+MXE[r.ey]:'');}
+function mxCfgText(r){return (MXP[r.pre]||'')+' '+mxM(r.d||0)+' m · '+(r.md==='solo'?'da solo':'con partner')+' · '+(r.sp==='pickle'?'pickleball':'tennis')+(r.tk&&MXT[r.tk]?' · '+MXT[r.tk]+(r.tk==='lv'&&r.sc&&MXS[r.sc]?' ('+MXS[r.sc]+')':''):'')+(r.ey&&MXE[r.ey]?' · '+MXE[r.ey]:'');}
 function mxOpen(){mxDraw();$('mixp').style.display='flex';$('mix-box').scrollTop=0;}
 function mxClose(){$('mixp').style.display='none';}
 function mxSet(k,v){if(k==='n')v=parseInt(v,10);MX[k]=v;mxDraw();}
@@ -971,19 +971,20 @@ function mxInfo(){const e=$('mx-info');if(!e)return;const c=MX,d=mxDist(c);
  e.innerHTML=t;}
 function mxDraw(){const c=MX,partner=c.md==='partner',mono=c.eye!=='both';
  if(c.task==='dot'||c.task==='cambio'||c.task==='passo')c.task='lv';
+ if(c.scr==='cifra'||c.scr==='misto'||!c.scr)c.scr='numeri';
  if(!partner&&(c.task==='rileva'||c.task==='reagisci'))c.task='lv';
  if(mono&&c.task==='reagisci')c.task='lv';
  const sg=(k,it)=>'<div class="segs">'+it.map(a=>'<button class="'+(String(c[k])===String(a[0])?'on':'')+'" onclick="mxSet(\''+k+'\',\''+a[0]+'\')">'+a[1]+'</button>').join('')+'</div>';
  let tasks=partner?[['lv','Lontano ↔ Vicino'],['rileva','Rileva'],['reagisci','Reagisci']]:[['lv','Lontano ↔ Vicino']];
  if(mono)tasks=tasks.filter(t=>t[0]!=='reagisci');
- const tdesc={lv:'Alterni <b>esterno</b> (bersaglio lontano a destra o a sinistra, pallino rosso o giallo) e <b>schermo</b> (pallino verde con una cifra, un colore o una somma da dire): lontano, vicino, lontano, vicino.',cambio:'Fissi il segnale di destra o sinistra e tieni l\'altro in periferia.',rileva:'Come Fix DX/SX, e il coach muove il segnale non fissato.',reagisci:'Come Fix DX/SX, con reazione e passo laterale.',passo:'Fix DX/SX più un passo laterale.'}[c.task];
+ const tdesc={lv:'Alterni <b>esterno</b> (bersaglio lontano a destra o a sinistra, pallino rosso o giallo) e <b>schermo</b> (pallino verde con un colore o un numero da memorizzare): lontano, vicino, lontano, vicino. Da lontano non devi fare altro che spostare lo sguardo. A fine serie l\'app ti chiede la risposta e la verifica.',cambio:'Fissi il segnale di destra o sinistra e tieni l\'altro in periferia.',rileva:'Come Fix DX/SX, e il coach muove il segnale non fissato.',reagisci:'Come Fix DX/SX, con reazione e passo laterale.',passo:'Fix DX/SX più un passo laterale.'}[c.task];
  $('mix-box').innerHTML='<h3>Sessione mista</h3><p class="note" style="margin:0">Schermo + campo: l\'app dà il comando <b>destra / sinistra</b>, tu porti lo sguardo sul lato giusto.</p>'+
   '<div class="lb">Modalità</div>'+sg('md',[['partner','Con partner'],['solo','Da solo']])+
   '<div class="lb">Sport</div>'+sg('sp',[['tennis','Tennis'],['pickle','Pickleball']])+
   '<div class="lb">Distanza</div>'+sg('pre',[['vicino','Vicino'],['rete','Rete'],['campo','Campo'],['libera','Libera']])+
   (c.pre==='libera'?'<input class="inp" id="mx-d" type="number" inputmode="decimal" min="1" max="40" step="0.5" value="'+c.dist+'" oninput="mxDin(this.value)" style="margin-top:8px" placeholder="metri">':'')+
   '<div class="lb">Compito</div>'+sg('task',tasks)+'<p class="note" style="margin:-6px 0 10px">'+tdesc+'</p>'+
-  (c.task==='lv'?'<div class="lb">Sullo schermo</div>'+sg('scr',[['cifra','Cifra'],['colori','Colori'],['somma','Somma']]):'')+
+  (c.task==='lv'?'<div class="lb">Sullo schermo</div>'+sg('scr',[['colori','Colori'],['numeri','Numeri'],['somma','Somma']]):'')+
   '<div class="lb">Occhi</div>'+sg('eye',[['both','Entrambi'],['dom','Dominante'],['nondom','Non dom.'],['alt','Alterna']])+
   '<p class="note" style="margin:-6px 0 10px">Consiglio: <b>Lontano ↔ Vicino</b> con l\'occhio dominante (fuoco); <b>Rileva</b> con il non dominante (periferia). Oppure con entrambi.</p>'+
   (mono?'<div class="lb">Il tuo occhio dominante</div>'+sg('dom',[['dx','Destro'],['sx','Sinistro']])+
@@ -999,7 +1000,7 @@ function mxGo(){if(MX.eye!=='both'&&!MX.dom){const e=$('mx-info');if(e)e.innerHT
 function eyeTxt(c,i){if(c.eye==='both')return'';const o=c.dom==='dx'?'sx':'dx',nm=x=>x==='dx'?'destro':'sinistro';
  let open;if(c.eye==='dom')open=c.dom;else if(c.eye==='nondom')open=o;else open=i<=c.n/2?c.dom:o;
  return '<b>Occhio '+nm(open)+' aperto</b> ('+(open===c.dom?'dominante':'non dominante')+'): copri l\'altro con la mano o una benda, restando fermo. ';}
-const SCW={cifra:'una <b>cifra</b>',colori:'un <b>colore</b> (blu, viola, arancio o bianco)',somma:'una <b>somma</b> da fare a mente'};
+const SCW={colori:'un <b>colore</b>: conta quante volte compare il colore indicato',numeri:'un <b>numero</b>: conta quante volte compare il numero indicato',somma:'un <b>numero</b>: somma mentalmente tutti i numeri che compaiono'};
 function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.max(1,Math.round(d/0.75)),big=d>=10,partner=c.md==='partner';
  const ob=big?'la paletta':'la pallina',mk=big?'racchette o palette colorate':'una pallina';
  const setup=partner
@@ -1009,7 +1010,7 @@ function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.m
   ?'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra voi due. <b>Esecutore</b>: tablet appoggiato a circa 40 cm davanti a te, volume alto, sole alle spalle. <b>Coach</b>: di fronte, braccia aperte, con '+mk+' per mano come bersagli. I due bersagli stanno a 1,8 m uno dall\'altro: da qui sono a circa <b>'+angD+'°</b> a destra e a sinistra dello schermo. Destra e sinistra sono <b>quelle di chi esegue</b>.'
   :'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra te e i bersagli. Metti due bersagli (coni, palline appese, post-it) a <b>1,8 m</b> uno dall\'altro, all\'altezza degli occhi o del petto. Tablet appoggiato a circa 40 cm davanti a te, volume alto, sole alle spalle. I bersagli stanno a circa <b>'+angD+'°</b> a destra e a sinistra dello schermo.';
  const TXT={
-  lv:partner?'Guarda lo schermo: il pallino è <b>verde</b> con '+SCW[c.scr||'cifra']+', dillo a voce. Al bip acuto diventa <b>rosso</b> (esterno <b>destra</b>) o al bip più basso <b>giallo</b> (esterno <b>sinistra</b>): porta lo sguardo sul coach da quel lato. Il coach mostra <b>mano aperta</b> o <b>pugno</b>: dillo a voce. Poi torni allo schermo, e così via. Solo gli occhi, testa ferma.':'Guarda lo schermo: il pallino è <b>verde</b> con '+SCW[c.scr||'cifra']+', dillo a voce. Al bip acuto diventa <b>rosso</b> (esterno <b>destra</b>) o al bip più basso <b>giallo</b> (esterno <b>sinistra</b>): porta lo sguardo sul bersaglio lontano da quel lato e tienilo. Poi torni allo schermo, e così via, senza pause. Solo gli occhi, testa ferma.',
+  lv:'Guarda lo schermo: il pallino è <b>verde</b> e mostra '+SCW[c.scr||'colori']+'. <b>Memorizza, non dirlo.</b> Al bip acuto il pallino diventa <b>rosso</b> (esterno <b>destra</b>) o al bip più basso <b>giallo</b> (esterno <b>sinistra</b>): porta lo sguardo sul bersaglio lontano da quel lato. Da lontano non serve fare altro: serve solo a spostare lo sguardo e la messa a fuoco. Poi torni allo schermo, e così via. Solo gli occhi, testa ferma. Alla fine l\'app ti chiede la risposta e la verifica.',
   rileva:'Al comando <b>fissa</b> '+ob+' di <b>destra</b> o <b>sinistra</b> con un solo movimento, poi resta fermo. Mentre la fissi, il coach <b>alza o abbassa</b> l\'altra a sorpresa: tu dici <b>SU</b> o <b>GIÙ</b> senza spostare lo sguardo.',
   cambio:partner
    ?'Al comando <b>sposta lo sguardo</b> verso '+ob+' indicata con un solo movimento rapido, poi fermo. Il coach tiene le braccia ferme. L\'altra la senti con la coda dell\'occhio, senza guardarla.'
@@ -1020,7 +1021,7 @@ function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.m
  const iv=c.task==='lv'?[3000,3000]:(d<5?[3000,4500]:d<15?[3500,5000]:[4000,6000]),hold=d<15?2000:2600;
  const steps=[FS.H,FS.X,{t:'Posizioni e distanza',s:(partner?'con partner':'da solo')+' · prepara e avvia',d:60,man:true,i:c.task==='lv'?'dotbers':(partner?'compagno':'peri'),x:(c.task==='lv'?setupDot:setup)+(c.eye!=='both'?' <b>Un occhio solo:</b> usa il test del mirino per trovare il dominante; resta fermo, niente passi.':'')}];
  for(let i=1;i<=c.n;i++){const sw=partner&&i>c.n/2;
-  steps.push({t:(c.task==='lv'?'Lontano ↔ Vicino':'Fix DX/SX')+' · serie '+i+' di '+c.n,s:(sw?'ruoli scambiati · ':'')+'30 sec · '+(c.task==='lv'?'pallino e bip':'comando vocale'),d:30,i:c.task==='lv'?'dotbers':'fixlr',fx:true,lv:c.task==='lv',scr:c.scr||'cifra',hold:hold,id:'F',iv:iv,
+  steps.push({t:(c.task==='lv'?'Lontano ↔ Vicino':'Fix DX/SX')+' · serie '+i+' di '+c.n,s:(sw?'ruoli scambiati · ':'')+'30 sec · '+(c.task==='lv'?'pallino e bip':'comando vocale'),d:30,i:c.task==='lv'?'dotbers':'fixlr',fx:true,lv:c.task==='lv',scr:c.scr||'colori',hold:hold,id:'F',iv:iv,
    x:(sw?'<b>Scambiate i ruoli</b>: chi era coach ora esegue, e il tablet va vicino a lui. ':'')+eyeTxt(c,i)+TXT[c.task]+' Alla fine indica quanti comandi hai eseguito bene.'});}
  steps.push(FS.B);
  return steps;}
@@ -1028,7 +1029,7 @@ let fxLast='',fxRun=0,fxU=0;
 let fxRT=null;
 function fxHide(){clearTimeout(fxRT);const e=$('fxcue');if(e)e.style.display='none';}
 function fxDot(st,kind,dig,sub){const e=$('fxcue');if(!e)return;const fix=kind==='fix';
- const m={g:['#2fd49f','●','SCHERMO',kind==='lv'?(sub||'leggi la cifra'):fix?'guarda il tablet, aspetta il comando':'guarda il tablet'],
+ const m={g:['#2fd49f','●','SCHERMO',kind==='lv'?(sub||''):fix?'guarda il tablet, aspetta il comando':'guarda il tablet'],
   dx:['#ff5a5f','▶','ESTERNO · DESTRA',fix?'fissa il segnale di destra':'guarda il bersaglio a destra'],
   sx:['#ffd23f','◀','ESTERNO · SINISTRA',fix?'fissa il segnale di sinistra':'guarda il bersaglio a sinistra']}[st];
  e.style.display='block';e.style.minHeight='200px';
@@ -1038,11 +1039,25 @@ function fxUnlock(){if(fxU||!cur||!cur.steps[idx].fx||!P.voice||!P.snd||!('speec
 function fxSay(t){if(!P.snd||!P.voice||!('speechSynthesis' in window))return;
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='it-IT';u.rate=1.05;u.volume=1;speechSynthesis.speak(u);}catch(e){}}
 let lvPh='S',lvSide='';
-function lvDig(scr){scr=scr||'cifra';
- if(scr==='colori'){const C=['#3b82f6','#a855f7','#fb923c','#ffffff'];return '<span style="display:block;width:58%;height:58%;border-radius:14px;background:'+C[Math.floor(Math.random()*4)]+'"></span>';}
- if(scr==='somma'){const a=1+Math.floor(Math.random()*5),b=1+Math.floor(Math.random()*5);return '<span style="font-size:.62em;letter-spacing:-1px">'+a+'+'+b+'</span>';}
- return String(1+Math.floor(Math.random()*9));}
-const LVSUB={cifra:'leggi la cifra',colori:'dì il colore',somma:'dì la somma'};
+const CN=['blu','viola','arancio','bianco'],CC=['#3b82f6','#a855f7','#fb923c','#ffffff'];
+let lvT='',lvN=0,lvS=0;
+function lvInit(s){lvN=0;lvS=0;lvT=s.scr==='colori'?CN[Math.floor(Math.random()*4)]:s.scr==='numeri'?String(1+Math.floor(Math.random()*9)):'';}
+function lvSub(s){return s.scr==='colori'?'conta il '+lvT.toUpperCase():s.scr==='numeri'?'conta il '+lvT:'somma tutti i numeri';}
+function lvShow(s){let h;
+ if(s.scr==='colori'){const t=CN.indexOf(lvT);let k;if(Math.random()<.4)k=t;else{do{k=Math.floor(Math.random()*4);}while(k===t);}
+  if(k===t)lvN++;h='<span style="display:block;width:58%;height:58%;border-radius:14px;background:'+CC[k]+'"></span>';}
+ else if(s.scr==='numeri'){const t=+lvT;let n;if(Math.random()<.35)n=t;else{do{n=1+Math.floor(Math.random()*9);}while(n===t);}
+  if(n===t)lvN++;h=String(n);}
+ else{const n=1+Math.floor(Math.random()*6);lvS+=n;h=String(n);}
+ fxDot('g','lv',h,lvSub(s));}
+function lvAnsVal(s){return s.scr==='somma'?lvS:lvN;}
+function lvQ(s){return s.scr==='colori'?'Quante volte è comparso il <b>'+lvT+'</b>?':s.scr==='numeri'?'Quante volte è comparso il <b>'+lvT+'</b>?':'Quanto fa la <b>somma</b> di tutti i numeri?';}
+function askLv(){signal();fxHide();const s=cur.steps[idx];
+ $('askp-box').innerHTML='<h3>'+s.t+'</h3><p>'+lvQ(s)+'</p><input class="inp" id="lvin" type="number" inputmode="numeric" min="0" max="99" style="text-align:center;font-size:22px;margin:6px 0 12px"><button class="fill" id="lvok">Conferma</button>';
+ $('askp').style.display='flex';
+ $('lvok').onclick=()=>{const v=parseInt($('lvin').value,10);if(isNaN(v))return;const real=lvAnsVal(s),ok=v===real;
+  $('askp-box').innerHTML='<h3>'+(ok?'✓ Esatto':'Era '+real)+'</h3><p>'+(ok?'':'Hai detto '+v+'. ')+'Cambi lontano ↔ vicino: <b>'+att+'</b></p><button class="fill" id="lvgo">Avanti</button>';
+  $('lvgo').onclick=()=>{const g=R.misto.cfg||{};rf[idx]={id:'F',t:1,ok:ok?1:0,pre:g.pre,d:g.d,md:g.md,sp:g.sp,tk:g.tk,ey:g.ey,sc:g.sc};$('askp').style.display='none';att=0;done();};};}
 function lvStep(){if(!run)return;const s=cur.steps[idx];if(!s||!s.lv)return;
  if(lvPh==='S'){let side=Math.random()<.5?'dx':'sx';
   if(side===fxLast&&fxRun>=2)side=side==='dx'?'sx':'dx';
@@ -1051,10 +1066,10 @@ function lvStep(){if(!run)return;const s=cur.steps[idx];if(!s||!s.lv)return;
   fxDot(side,'lv');beep(dx?880:620,.16,.28);if(P.snd&&navigator.vibrate)navigator.vibrate(dx?[50]:[30,40,30]);
   fxSay(dx?'Esterno destra':'Esterno sinistra');paintTime();
   bpT=setTimeout(lvStep,(s.hold||2000)+1000);}
- else{lvPh='S';fxDot('g','lv',lvDig(s.scr),LVSUB[s.scr||'cifra']);beep(440,.14,.25);fxSay('Schermo');
-  bpT=setTimeout(lvStep,1800+Math.random()*600);}}
+ else{lvPh='S';lvShow(s);beep(440,.14,.25);fxSay('Schermo');
+  bpT=setTimeout(lvStep,1900+Math.random()*600);}}
 function schedFix(first){const s=cur.steps[idx];clearTimeout(bpT);if(!s.fx||!run)return;
- if(s.lv){if(first){lvPh='S';fxDot('g','lv',lvDig(s.scr),LVSUB[s.scr||'cifra']);bpT=setTimeout(lvStep,3000);}return;}
+ if(s.lv){if(first){lvPh='S';if(att===0&&left===s.d)lvInit(s);lvShow(s);bpT=setTimeout(lvStep,3500);}return;}
  if(first&&s.fx)fxDot('g',s.dot?'':'fix');
  bpT=setTimeout(()=>{if(!run)return;fxCmd();schedFix();},att===0?(s.dot?3500:2200):s.iv[0]+Math.random()*(s.iv[1]-s.iv[0]));}
 function fxCmd(){let side=Math.random()<.5?'dx':'sx';
@@ -1066,7 +1081,7 @@ function fxCmd(){let side=Math.random()<.5?'dx':'sx';
  fxDot(side,'fix');
  beep(dx?880:620,.16,.28);if(P.snd&&navigator.vibrate)navigator.vibrate(dx?[50]:[30,40,30]);
  fxSay(dx?'Esterno destra':'Esterno sinistra');paintTime();}
-function askFix(){signal();fxHide();const s=cur.steps[idx];let v=att;
+function askFix(){if(cur.steps[idx].lv){askLv();return;}signal();fxHide();const s=cur.steps[idx];let v=att;
  $('askp-box').innerHTML='<h3>'+s.t+'</h3><p>Comandi: <b>'+att+'</b> · quanti eseguiti bene?<br><span style="font-size:12px">(sguardo sul lato giusto e risposta corretta)</span></p>'+
   '<div class="cnt"><button onclick="fxAdj(-1)">−</button><b id="fxv">'+v+'</b><button onclick="fxAdj(1)">+</button></div>'+
   '<button class="fill" onclick="fxOk()">Conferma</button>';
@@ -1078,7 +1093,7 @@ function mxBlock(){const rows=[];
   const T=s.rf.reduce((a,b)=>a+b.t,0),O=s.rf.reduce((a,b)=>a+b.ok,0);
   rows.push('<div class="l"><span style="padding-right:10px">'+esc(String(s.date).replace(/\/\d{4}$/,''))+' · '+esc(mxCfgText(s.rf[0]))+'</span><b>'+O+'/'+T+' · '+(T?Math.round(O/T*100):0)+'%</b></div>');}
  if(!rows.length)return'';
- return'<div class="sum"><h4 style="margin:0 0 2px;font-size:14px">Sessione mista</h4><p class="note" style="margin:0 0 6px">Comandi eseguiti bene, ultime sessioni. Confronta solo prove con stessa distanza, stesso compito e stessi occhi.</p>'+rows.join('')+'</div>';}
+ return'<div class="sum"><h4 style="margin:0 0 2px;font-size:14px">Sessione mista</h4><p class="note" style="margin:0 0 6px">Risposte esatte e comandi eseguiti bene, ultime sessioni. Confronta solo prove con stessa distanza, stesso compito e stessi occhi.</p>'+rows.join('')+'</div>';}
 const _pt0=paintTime;
 paintTime=function(){_pt0();if(!cur)return;const s=cur.steps[idx];if(s&&s.man){$('p-time').textContent='✓';$('p-state').textContent='sistema tutto, poi premi Avvia';$('prog').style.strokeDashoffset=0;$('b-play').textContent='▶  Sono in posizione · Avvia';}};
 const _paintProg0=paintProg;
