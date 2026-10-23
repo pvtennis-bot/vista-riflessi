@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Vista">
-<meta name="app-version" content="3.10">
+<meta name="app-version" content="3.12">
 <style>
 :root{
   --bg:#0d1412; --bg2:#141d1a; --card:#182521; --line:#26332e;
@@ -460,7 +460,7 @@ const R={
  schermo:{k:'schermo',name:'Allenatore visivo',acc:'amber',days:[],steps:[FS.H,FS.V,FS.D,FS.X,FS.S]},
  misto:{k:'misto',name:'Sessione mista',acc:'blue',days:[],steps:[]}
 };
-const VER='3.10',VER_DATE='23/10/2026';
+const VER='3.12',VER_DATE='23/10/2026';
 const $=id=>document.getElementById(id);
 const P=JSON.parse(localStorage.getItem('vr-pref')||'{"auto":0,"snd":1,"wake":1,"name":""}');
 const L=JSON.parse(localStorage.getItem('vr-log')||'{}');
@@ -1006,10 +1006,10 @@ const SCW={colori:'un <b>colore</b>: conta quante volte compare il colore indica
 function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.max(1,Math.round(d/0.75)),big=d>=10,partner=c.md==='partner';
  const ob=big?'la paletta':'la pallina',mk=big?'racchette o palette colorate':'una pallina';
  const setup=partner
-  ?'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra voi due. <b>Esecutore</b>: posizione di attesa, sole alle spalle, tablet appoggiato vicino a te, volume alto. <b>Coach</b>: di fronte, braccia aperte, con '+mk+' per mano. Destra e sinistra sono <b>quelle di chi esegue</b>: la mano destra dell\'esecutore è la sinistra del coach. Fissando uno dei due, l\'altro cade a circa <b>'+ang+'°</b> di periferia.'
+  ?'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra voi due. <b>Esecutore</b>: posizione di attesa, sole alle spalle, tablet appoggiato vicino a te, volume alto. <b>Coach</b>: di fronte, braccia aperte, con '+mk+' per mano: <b>tiene solo i bersagli fermi</b>, fa tutto l\'esecutore con il suo telefono. In alternativa bastano <b>2 coni a 1,8 m</b> con <b>una pallina sopra ciascun cono</b>, senza partner. Destra e sinistra sono <b>quelle di chi esegue</b>: la mano destra dell\'esecutore è la sinistra del coach. Fissando uno dei due, l\'altro cade a circa <b>'+ang+'°</b> di periferia.'
   :'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra te e i due segnali. Metti due segnali (coni, palline appese, post-it) a <b>1,8 m</b> uno dall\'altro, all\'altezza del petto. Tablet vicino a te, volume alto, sole alle spalle. Fissando uno dei due, l\'altro cade a circa <b>'+ang+'°</b> di periferia.';
  const setupDot=partner
-  ?'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra voi due. <b>Esecutore</b>: tablet appoggiato a circa 40 cm davanti a te, volume alto, sole alle spalle. <b>Coach</b>: di fronte, braccia aperte, con '+mk+' per mano come bersagli. I due bersagli stanno a 1,8 m uno dall\'altro: da qui sono a circa <b>'+angD+'°</b> a destra e a sinistra dello schermo. Destra e sinistra sono <b>quelle di chi esegue</b>.'
+  ?'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra voi due. <b>Esecutore</b>: tablet appoggiato a circa 40 cm davanti a te, volume alto, sole alle spalle. <b>Coach</b>: di fronte, braccia aperte, con '+mk+' per mano come bersagli: <b>tiene solo i bersagli fermi</b>, fa tutto l\'esecutore con il suo telefono. In alternativa bastano <b>2 coni a 1,8 m</b> con <b>una pallina sopra ciascun cono</b>. I due bersagli stanno a 1,8 m uno dall\'altro: da qui sono a circa <b>'+angD+'°</b> a destra e a sinistra dello schermo. Destra e sinistra sono <b>quelle di chi esegue</b>.'
   :'Misura <b>'+mxM(d)+' m</b> (circa '+pass+' passi) tra te e i bersagli. Metti due bersagli (coni, palline appese, post-it) a <b>1,8 m</b> uno dall\'altro, all\'altezza degli occhi o del petto. Tablet appoggiato a circa 40 cm davanti a te, volume alto, sole alle spalle. I bersagli stanno a circa <b>'+angD+'°</b> a destra e a sinistra dello schermo.';
  const TXT={
   lv:'Guarda lo schermo: il pallino è <b>verde</b> e mostra '+SCW[c.scr||'colori']+'. <b>Memorizza, non dirlo.</b> Al bip acuto il pallino diventa <b>rosso</b> (esterno <b>destra</b>) o al bip più basso <b>giallo</b> (esterno <b>sinistra</b>): porta lo sguardo sul bersaglio lontano da quel lato. Da lontano non serve fare altro: serve solo a spostare lo sguardo e la messa a fuoco. Poi torni allo schermo, e così via. Solo gli occhi, testa ferma. Alla fine l\'app ti chiede la risposta e la verifica.',
@@ -1022,7 +1022,7 @@ function buildMisto(c){const d=mxDist(c),ang=mxAng(d),angD=mxAngD(d),pass=Math.m
  };
  const iv=c.task==='lv'?[3000,3000]:(d<5?[3000,4500]:d<15?[3500,5000]:[4000,6000]),hold=d<15?2000:2600;
  const steps=[FS.H,FS.X,{t:'Posizioni e distanza',s:(partner?'con partner':'da solo')+' · prepara e avvia',d:60,man:true,i:c.task==='lv'?'dotbers':(partner?'compagno':'peri'),x:(c.task==='lv'?setupDot:setup)+(c.eye!=='both'?' <b>Un occhio solo:</b> usa il test del mirino per trovare il dominante; resta fermo, niente passi.':'')}];
- for(let i=1;i<=c.n;i++){const sw=partner&&i>c.n/2;
+ for(let i=1;i<=c.n;i++){const sw=false;
   steps.push({t:(c.task==='lv'?'Lontano ↔ Vicino':'Fix DX/SX')+' · serie '+i+' di '+c.n,s:(sw?'ruoli scambiati · ':'')+'30 sec · '+(c.task==='lv'?'pallino e bip':'comando vocale'),d:30,i:c.task==='lv'?'dotbers':'fixlr',fx:true,lv:c.task==='lv',scr:c.scr||'colori',hold:hold,id:'F',iv:iv,
    x:(sw?'<b>Scambiate i ruoli</b>: chi era coach ora esegue, e il tablet va vicino a lui. ':'')+eyeTxt(c,i)+TXT[c.task]+' Alla fine indica quanti comandi hai eseguito bene.'});}
  steps.push(FS.B);
@@ -1049,7 +1049,9 @@ function lvIntro(s){let h;
  if(s.scr==='colori'){const k=CN.indexOf(lvT);h='<span class="fxi">CONTA<span style="display:block;width:2.4em;height:2.4em;border-radius:14px;background:'+CC[k]+';margin:5px auto 3px"></span>'+lvT.toUpperCase()+'</span>';}
  else if(s.scr==='numeri')h='<span class="fxi">CONTA IL<br><b style="font-size:3.2em;line-height:1">'+lvT+'</b></span>';
  else h='<span class="fxi">SOMMA<br>TUTTO</span>';
- fxDot('g','lv',h,'');}
+ fxDot('g','lv',h,'');
+ const e=document.getElementById('fxcue'),d=e.querySelector('.fxd'),b=e.querySelector('b');
+ d.style.background='transparent';d.style.border='8px dashed #cfd8d4';d.style.color='#eaf2ee';b.style.color='#cfd8d4';b.textContent='CONSEGNA · NON CONTARE';}
 function lvShow(s){let h;
  if(s.scr==='colori'){const t=CN.indexOf(lvT);let k;if(Math.random()<.4)k=t;else{do{k=Math.floor(Math.random()*4);}while(k===t);}
   if(k===t)lvN++;h='<span style="display:block;width:62%;height:62%;border-radius:22px;background:'+CC[k]+'"></span>';}
